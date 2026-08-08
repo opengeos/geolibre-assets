@@ -1,0 +1,269 @@
+{
+  "version": "0.1.0",
+  "name": "3D Tiles",
+  "mapView": {
+    "center": [
+      -75.59686465858522,
+      40.0389023116457
+    ],
+    "zoom": 18.413815716253985,
+    "bearing": 1.6063697405643327,
+    "pitch": 69.50546978926,
+    "bbox": [
+      -75.60411928925795,
+      40.037935452246074,
+      -75.58877008975936,
+      40.05053143889785
+    ]
+  },
+  "basemapStyleUrl": "https://tiles.openfreemap.org/styles/positron",
+  "basemapVisible": true,
+  "basemapOpacity": 1,
+  "layers": [
+    {
+      "id": "c213eb9e-3a20-4423-9c66-320828315ad2",
+      "name": "WMTS Layer",
+      "type": "wmts",
+      "source": {
+        "type": "raster",
+        "tiles": [
+          "https://wayback.maptiles.arcgis.com/arcgis/rest/services/World_Imagery/MapServer/tile/119/{z}/{y}/{x}"
+        ],
+        "tileSize": 256,
+        "url": "https://wayback.maptiles.arcgis.com/arcgis/rest/services/World_Imagery/MapServer/tile/119/{z}/{y}/{x}"
+      },
+      "visible": true,
+      "opacity": 1,
+      "style": {
+        "minZoom": 0,
+        "maxZoom": 24,
+        "fillColor": "#3b82f6",
+        "strokeColor": "#1e40af",
+        "strokeWidth": 2,
+        "fillOpacity": 0.6,
+        "circleRadius": 6,
+        "extrusionEnabled": false,
+        "extrusionColor": "#3b82f6",
+        "extrusionOpacity": 0.8,
+        "extrusionHeightProperty": "height",
+        "extrusionHeightScale": 1,
+        "extrusionBase": 0,
+        "extrusionAdvancedStyleEnabled": false,
+        "extrusionColorExpression": "",
+        "extrusionHeightExpression": "",
+        "vectorStyleMode": "single",
+        "vectorStyleProperty": "",
+        "vectorStyleClassCount": 5,
+        "vectorStyleColorRamp": "viridis",
+        "vectorStyleClassificationScheme": "equal-interval",
+        "vectorStyleStops": [
+          {
+            "value": 0,
+            "color": "#dbeafe"
+          },
+          {
+            "value": 1,
+            "color": "#2563eb"
+          }
+        ],
+        "vectorStyleExpression": "",
+        "rasterBrightnessMin": 0,
+        "rasterBrightnessMax": 1,
+        "rasterSaturation": 0,
+        "rasterContrast": 0,
+        "rasterHueRotate": 0
+      },
+      "metadata": {
+        "service": "wmts"
+      }
+    },
+    {
+      "id": "tileset-3",
+      "name": "3D Tiles",
+      "type": "3d-tiles",
+      "source": {
+        "altitudeOffset": -300,
+        "sourceId": "tileset-3",
+        "type": "3d-tiles",
+        "url": "https://pelican-public.s3.amazonaws.com/3dtiles/agi-hq/tileset.json"
+      },
+      "visible": true,
+      "opacity": 1,
+      "style": {
+        "minZoom": 0,
+        "maxZoom": 24,
+        "fillColor": "#3b82f6",
+        "strokeColor": "#1e40af",
+        "strokeWidth": 2,
+        "fillOpacity": 0.6,
+        "circleRadius": 6,
+        "extrusionEnabled": false,
+        "extrusionColor": "#3b82f6",
+        "extrusionOpacity": 0.8,
+        "extrusionHeightProperty": "height",
+        "extrusionHeightScale": 1,
+        "extrusionBase": 0,
+        "extrusionAdvancedStyleEnabled": false,
+        "extrusionColorExpression": "",
+        "extrusionHeightExpression": "",
+        "vectorStyleMode": "single",
+        "vectorStyleProperty": "",
+        "vectorStyleClassCount": 5,
+        "vectorStyleColorRamp": "viridis",
+        "vectorStyleClassificationScheme": "equal-interval",
+        "vectorStyleStops": [
+          {
+            "value": 0,
+            "color": "#dbeafe"
+          },
+          {
+            "value": 1,
+            "color": "#2563eb"
+          }
+        ],
+        "vectorStyleExpression": "",
+        "rasterBrightnessMin": 0,
+        "rasterBrightnessMax": 1,
+        "rasterSaturation": 0,
+        "rasterContrast": 0,
+        "rasterHueRotate": 0
+      },
+      "metadata": {
+        "altitude": 17.626794261857867,
+        "altitudeOffset": -300,
+        "center": [
+          -75.59670696327481,
+          40.03879587598327
+        ],
+        "customLayerType": "3d-tiles",
+        "externalNativeLayer": true,
+        "identifiable": false,
+        "layerName": "3D Tiles",
+        "nativeLayerIds": [
+          "geolibre-3d-tiles"
+        ],
+        "panelCollapsed": true,
+        "sourceId": "tileset-3",
+        "sourceKind": "3d-tiles-url",
+        "status": "loaded"
+      },
+      "sourcePath": "https://pelican-public.s3.amazonaws.com/3dtiles/agi-hq/tileset.json"
+    }
+  ],
+  "styles": {
+    "c213eb9e-3a20-4423-9c66-320828315ad2": {
+      "minZoom": 0,
+      "maxZoom": 24,
+      "fillColor": "#3b82f6",
+      "strokeColor": "#1e40af",
+      "strokeWidth": 2,
+      "fillOpacity": 0.6,
+      "circleRadius": 6,
+      "extrusionEnabled": false,
+      "extrusionColor": "#3b82f6",
+      "extrusionOpacity": 0.8,
+      "extrusionHeightProperty": "height",
+      "extrusionHeightScale": 1,
+      "extrusionBase": 0,
+      "extrusionAdvancedStyleEnabled": false,
+      "extrusionColorExpression": "",
+      "extrusionHeightExpression": "",
+      "vectorStyleMode": "single",
+      "vectorStyleProperty": "",
+      "vectorStyleClassCount": 5,
+      "vectorStyleColorRamp": "viridis",
+      "vectorStyleClassificationScheme": "equal-interval",
+      "vectorStyleStops": [
+        {
+          "value": 0,
+          "color": "#dbeafe"
+        },
+        {
+          "value": 1,
+          "color": "#2563eb"
+        }
+      ],
+      "vectorStyleExpression": "",
+      "rasterBrightnessMin": 0,
+      "rasterBrightnessMax": 1,
+      "rasterSaturation": 0,
+      "rasterContrast": 0,
+      "rasterHueRotate": 0
+    },
+    "tileset-3": {
+      "minZoom": 0,
+      "maxZoom": 24,
+      "fillColor": "#3b82f6",
+      "strokeColor": "#1e40af",
+      "strokeWidth": 2,
+      "fillOpacity": 0.6,
+      "circleRadius": 6,
+      "extrusionEnabled": false,
+      "extrusionColor": "#3b82f6",
+      "extrusionOpacity": 0.8,
+      "extrusionHeightProperty": "height",
+      "extrusionHeightScale": 1,
+      "extrusionBase": 0,
+      "extrusionAdvancedStyleEnabled": false,
+      "extrusionColorExpression": "",
+      "extrusionHeightExpression": "",
+      "vectorStyleMode": "single",
+      "vectorStyleProperty": "",
+      "vectorStyleClassCount": 5,
+      "vectorStyleColorRamp": "viridis",
+      "vectorStyleClassificationScheme": "equal-interval",
+      "vectorStyleStops": [
+        {
+          "value": 0,
+          "color": "#dbeafe"
+        },
+        {
+          "value": 1,
+          "color": "#2563eb"
+        }
+      ],
+      "vectorStyleExpression": "",
+      "rasterBrightnessMin": 0,
+      "rasterBrightnessMax": 1,
+      "rasterSaturation": 0,
+      "rasterContrast": 0,
+      "rasterHueRotate": 0
+    }
+  },
+  "preferences": {
+    "map": {
+      "restrictBounds": false,
+      "bounds": [
+        -180,
+        -85,
+        180,
+        85
+      ],
+      "minZoom": 0,
+      "maxZoom": 24,
+      "maxPitch": 85,
+      "renderWorldCopies": true
+    },
+    "environmentVariables": []
+  },
+  "plugins": {
+    "manifestUrls": [],
+    "activePluginIds": [
+      "maplibre-layer-control"
+    ],
+    "mapControlPositions": {
+      "maplibre-layer-control": "top-right",
+      "maplibre-gl-basemap-control": "top-left",
+      "maplibre-gl-esri-wayback": "top-left",
+      "maplibre-gl-geoagent": "top-left",
+      "maplibre-gl-geo-editor": "top-left",
+      "maplibre-gl-lidar": "top-left",
+      "maplibre-gl-streetview": "top-right",
+      "maplibre-gl-swipe": "top-left",
+      "maplibre-gl-components": "top-right",
+      "maplibre-gl-3d-tiles": "top-right"
+    },
+    "settings": {}
+  },
+  "metadata": {}
+}

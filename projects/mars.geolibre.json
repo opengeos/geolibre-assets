@@ -1,0 +1,84 @@
+{
+  "version": "0.2.0",
+  "name": "Mars",
+  "mapView": {
+    "center": [
+      74.10860828122145,
+      29.433213049610156
+    ],
+    "zoom": 2.7882075877345964,
+    "bearing": 0,
+    "pitch": 0,
+    "bbox": [
+      -180,
+      -45.409327996094945,
+      180,
+      90
+    ]
+  },
+  "basemapStyleUrl": "geolibre://basemap/mars-colour-mola-elevation",
+  "basemapVisible": true,
+  "basemapOpacity": 1,
+  "layers": [],
+  "styles": {},
+  "preferences": {
+    "map": {
+      "restrictBounds": false,
+      "bounds": [
+        -180,
+        -85,
+        180,
+        85
+      ],
+      "minZoom": 0,
+      "maxZoom": 24,
+      "maxPitch": 85,
+      "renderWorldCopies": true,
+      "projection": "globe",
+      "ellipsoidId": "mars",
+      "scaleUnit": "metric"
+    },
+    "environmentVariables": [],
+    "geocoding": {
+      "providerId": "nominatim",
+      "apiKeys": {}
+    }
+  },
+  "plugins": {
+    "manifestUrls": [],
+    "activePluginIds": [
+      "maplibre-layer-control",
+      "maplibre-atmosphere-effects",
+      "maplibre-deckgl-viz"
+    ],
+    "mapControlPositions": {
+      "maplibre-layer-control": "top-right",
+      "maplibre-gl-geo-editor": "top-left",
+      "maplibre-gl-annotations": "top-left",
+      "maplibre-gl-basemap-control": "top-left",
+      "maplibre-gl-fema-wms": "top-left",
+      "maplibre-gl-nasa-earthdata": "top-left",
+      "maplibre-gl-enviroatlas": "top-left",
+      "maplibre-gl-national-map": "top-left",
+      "maplibre-gl-esri-wayback": "top-left",
+      "maplibre-gl-time-slider": "bottom-left",
+      "geolibre-timelapse": "top-left",
+      "maplibre-gl-overture-maps": "top-left",
+      "maplibre-gl-geoagent": "top-left",
+      "maplibre-gl-usgs-lidar": "top-left",
+      "maplibre-gl-streetview": "top-right",
+      "maplibre-gl-mapillary": "top-left",
+      "geolibre-elevation-profile": "top-left",
+      "maplibre-gl-swipe": "top-left",
+      "maplibre-gl-components": "top-right"
+    },
+    "settings": {}
+  },
+  "legend": {
+    "title": "Legend",
+    "groupByLayer": true,
+    "order": [],
+    "overrides": {}
+  },
+  "metadata": {}
+}
