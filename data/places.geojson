@@ -1,0 +1,24 @@
+{
+  "type": "FeatureCollection",
+  "name": "GeoLibre sample places",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "nyc",
+      "properties": { "name": "New York", "kind": "city", "population": 8804190 },
+      "geometry": { "type": "Point", "coordinates": [-74.006, 40.7128] }
+    },
+    {
+      "type": "Feature",
+      "id": "dc",
+      "properties": { "name": "Washington, D.C.", "kind": "capital", "population": 689545 },
+      "geometry": { "type": "Point", "coordinates": [-77.0369, 38.9072] }
+    },
+    {
+      "type": "Feature",
+      "id": "boston",
+      "properties": { "name": "Boston", "kind": "city", "population": 675647 },
+      "geometry": { "type": "Point", "coordinates": [-71.0589, 42.3601] }
+    }
+  ]
+}

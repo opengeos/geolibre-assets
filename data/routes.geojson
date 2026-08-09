@@ -1,0 +1,15 @@
+{
+  "type": "FeatureCollection",
+  "name": "GeoLibre sample routes",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "northeast-corridor",
+      "properties": { "name": "Northeast sample route", "kind": "route" },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [[-77.0369, 38.9072], [-75.1652, 39.9526], [-74.0060, 40.7128], [-71.0589, 42.3601]]
+      }
+    }
+  ]
+}

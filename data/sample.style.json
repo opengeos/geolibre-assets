@@ -1,0 +1,28 @@
+{
+  "version": 8,
+  "name": "GeoLibre query parameter sample style",
+  "sources": {},
+  "layers": [
+    {
+      "id": "sample-polygons",
+      "type": "fill",
+      "paint": { "fill-color": "#22c55e", "fill-opacity": 0.45, "fill-outline-color": "#14532d" }
+    },
+    {
+      "id": "sample-lines",
+      "type": "line",
+      "paint": { "line-color": "#f97316", "line-width": 5, "line-opacity": 0.9 }
+    },
+    {
+      "id": "sample-points",
+      "type": "circle",
+      "paint": { "circle-color": "#2563eb", "circle-radius": 9, "circle-stroke-color": "#ffffff", "circle-stroke-width": 2 }
+    },
+    {
+      "id": "sample-labels",
+      "type": "symbol",
+      "layout": { "text-field": ["to-string", ["get", "name"]], "text-size": 14, "text-offset": [0, 1.2] },
+      "paint": { "text-color": "#111827", "text-halo-color": "#ffffff", "text-halo-width": 2 }
+    }
+  ]
+}
