@@ -1,0 +1,11 @@
+{
+  "mode": "single",
+  "bands": [1],
+  "rescale": [[0, 1000]],
+  "colormap": "viridis",
+  "reversed": false,
+  "nodata": "auto",
+  "opacity": 0.85,
+  "gamma": 1,
+  "stretch": "linear"
+}
