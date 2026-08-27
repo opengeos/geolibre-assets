@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>新一代云原生地理空间信息平台：GeoLibre</title>
 <style>
 :root{
@@ -21,15 +21,15 @@
   --h:720px;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;background:#04070e;overflow:hidden}
+html,body{height:100%;background:#04070e;overflow:hidden;overscroll-behavior:none;-webkit-text-size-adjust:100%}
 body{
   font-family:"Noto Sans SC","Source Han Sans SC","PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,-apple-system,"Segoe UI",sans-serif;
   color:var(--fg);
   -webkit-font-smoothing:antialiased;
   font-feature-settings:"tnum" 1;
 }
-#stage{position:fixed;inset:0;display:grid;place-items:center}
-#deck{width:var(--w);height:var(--h);position:relative;transform-origin:center center}
+#stage{position:fixed;inset:0;overflow:hidden}
+#deck{position:absolute;left:50%;top:50%;width:var(--w);height:var(--h);transform-origin:center center;-webkit-user-select:none;user-select:none}
 
 .slide{
   position:absolute;inset:0;width:var(--w);height:var(--h);
@@ -120,8 +120,14 @@ tr:last-child td{border-bottom:none}
 .pill.demo{background:linear-gradient(90deg,#ffb347,var(--a3));}
 
 /* ---------- special slides ---------- */
-.cover .inner{display:flex;flex-direction:column;justify-content:center;padding:0 92px}
-.cover h1{font-size:62px;font-weight:800;line-height:1.18;letter-spacing:-.02em}
+.cover .inner{display:flex;flex-direction:row;align-items:center;gap:58px;padding:0 92px}
+.cover .cmain{flex:1;min-width:0}
+.cover .cqr{flex:0 0 232px;text-align:center}
+.cover .cqr .qbox{background:#fff;border-radius:16px;padding:14px;box-shadow:0 10px 40px rgba(0,0,0,.45);width:-moz-fit-content;width:fit-content;margin:0 auto;display:flex;align-items:center;justify-content:center}
+.cover .cqr img{display:block;width:204px;height:204px;image-rendering:pixelated}
+.cover .cqr .qlab{margin-top:14px;font-size:15px;color:var(--fg2);line-height:1.7}
+.cover .cqr .qlab code{font-size:12.5px;display:inline-block;margin-top:5px}
+.cover h1{font-size:57px;font-weight:800;line-height:1.18;letter-spacing:-.02em}
 .cover h1 .g{background:linear-gradient(90deg,#7ab8ff,var(--a2));-webkit-background-clip:text;background-clip:text;color:transparent}
 .cover .en{margin-top:16px;font-size:20px;color:var(--fg3);letter-spacing:.04em}
 .cover .meta{margin-top:44px;font-size:19px;color:var(--fg2);line-height:2}
@@ -157,12 +163,34 @@ tr:last-child td{border-bottom:none}
 
 #help{position:fixed;left:16px;bottom:14px;z-index:60;font-size:12px;color:rgba(255,255,255,.22)}
 
+#nav{position:fixed;right:14px;bottom:14px;display:none;gap:10px;z-index:60}
+#nav button{width:48px;height:48px;border-radius:14px;border:1px solid var(--line2);background:rgba(12,20,36,.86);color:var(--fg);font-size:20px;line-height:1;cursor:pointer;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+#nav button:active{background:rgba(79,156,255,.3)}
+
+#rotate{position:fixed;left:50%;bottom:82px;transform:translateX(-50%);z-index:65;display:none;
+  background:rgba(12,20,36,.92);border:1px solid var(--line2);color:var(--fg2);font-size:14px;
+  padding:10px 18px;border-radius:999px;white-space:nowrap;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+
+@media (pointer:coarse),(max-width:900px){
+  #nav{display:flex}
+  #help{display:none}
+  #hud .btn{padding:9px 14px;font-size:14px}
+}
+@media (max-width:900px) and (orientation:portrait){
+  #rotate.show{display:block}
+}
+@media (max-width:900px){
+  #toc{padding:24px 20px}
+  #toc ol{columns:1}
+  #toc li{font-size:16px;padding:6px 0}
+}
+
 @media print{
   html,body{overflow:visible;background:#fff}
-  #stage{position:static;display:block}
-  #deck{transform:none!important;width:var(--w);height:auto}
+  #stage{position:static;display:block;overflow:visible}
+  #deck{position:static!important;left:auto;top:auto;transform:none!important;width:var(--w);height:auto}
   .slide{display:block!important;position:relative;page-break-after:always;break-after:page;width:var(--w);height:var(--h)}
-  #hud,#bar,#toc,#help{display:none!important}
+  #hud,#bar,#toc,#help,#nav,#rotate{display:none!important}
   @page{size:1280px 720px;margin:0}
 }
 </style>
@@ -174,14 +202,20 @@ tr:last-child td{border-bottom:none}
 <!-- 1 ---------------------------------------------------------------- -->
 <section class="slide cover">
   <div class="inner">
-    <img class="brandmark" src="images/geolibre.webp" alt="GeoLibre">
-    <div class="kicker">云原生地理空间 · Cloud-Native Geospatial</div>
-    <h1>新一代云原生<br>地理空间信息平台：<span class="g">GeoLibre</span></h1>
-    <div class="en">A Free, Open-Source, Cloud-Native GIS That Runs Everywhere</div>
-    <div class="meta">
-      <b>吴秋生</b><br>
-      田纳西大学诺克斯维尔分校 · opengeos 开源组织<br>
-      <span style="color:var(--fg3)">geolibre.app &nbsp;·&nbsp; github.com/opengeos/GeoLibre &nbsp;·&nbsp; MIT License</span>
+    <div class="cmain">
+      <img class="brandmark" src="images/geolibre.webp" alt="GeoLibre">
+      <div class="kicker">云原生地理空间 · Cloud-Native Geospatial</div>
+      <h1>新一代云原生<br>地理空间信息平台：<span class="g">GeoLibre</span></h1>
+      <div class="en">A Free, Open-Source, Cloud-Native GIS That Runs Everywhere</div>
+      <div class="meta">
+        <b>吴秋生 (Qiusheng Wu)</b><br>
+        田纳西大学诺克斯维尔分校 · opengeos 开源组织<br>
+        <span style="color:var(--fg3)">geolibre.app &nbsp;·&nbsp; github.com/opengeos/GeoLibre &nbsp;·&nbsp; MIT</span>
+      </div>
+    </div>
+    <div class="cqr">
+      <div class="qbox"><img src="images/qrcode-zh.png" alt="扫码打开本次报告的幻灯片"></div>
+      <div class="qlab">扫码打开本次报告幻灯片<br><code>go.gishub.org/geolibre-slides-zh</code></div>
     </div>
   </div>
 </section>
@@ -894,6 +928,8 @@ tr:last-child td{border-bottom:none}
 </div>
 <div id="toc"><h4>目录 · 点击跳转 · ESC 关闭</h4><ol id="tocList"></ol></div>
 <div id="help">← → 翻页 · F 全屏 · L 目录 · Ctrl+P 导出 PDF</div>
+<div id="nav"><button id="navPrev" aria-label="上一页">‹</button><button id="navNext" aria-label="下一页">›</button></div>
+<div id="rotate">把手机横过来，画面会大很多</div>
 
 <script>
 (function(){
@@ -920,8 +956,10 @@ tr:last-child td{border-bottom:none}
   });
 
   function fit(){
-    var s = Math.min(window.innerWidth / 1280, window.innerHeight / 720);
-    deck.style.transform = 'scale(' + s + ')';
+    var vv = window.visualViewport;
+    var w = vv ? vv.width : window.innerWidth;
+    var h = vv ? vv.height : window.innerHeight;
+    deck.style.transform = 'translate(-50%,-50%) scale(' + Math.min(w / 1280, h / 720) + ')';
   }
 
   function go(n){
@@ -952,8 +990,41 @@ tr:last-child td{border-bottom:none}
   document.getElementById('btnFs').addEventListener('click', toggleFs);
   document.getElementById('btnToc').addEventListener('click', function(){ toc.classList.toggle('on'); });
 
-  window.addEventListener('resize', fit);
-  fit();
+  var nav = document.getElementById('nav');
+  document.getElementById('navPrev').addEventListener('click', function(){ go(i-1); });
+  document.getElementById('navNext').addEventListener('click', function(){ go(i+1); });
+
+  // swipe to change slides (passive: native pinch-zoom and scrolling still work)
+  var tx = 0, ty = 0, tt = 0;
+  document.addEventListener('touchstart', function(e){
+    if (e.touches.length !== 1) return;
+    tx = e.touches[0].clientX; ty = e.touches[0].clientY; tt = Date.now();
+  }, { passive: true });
+  document.addEventListener('touchend', function(e){
+    if (!tt || toc.classList.contains('on')) return;
+    var t = e.changedTouches[0], dx = t.clientX - tx, dy = t.clientY - ty;
+    if (Date.now() - tt < 700 && Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.5) go(dx < 0 ? i + 1 : i - 1);
+    tt = 0;
+  }, { passive: true });
+
+  // one-time "turn your phone" hint, dismissed by tap or by rotating
+  var rot = document.getElementById('rotate');
+  function hint(){
+    if (window.innerWidth < 900 && window.innerHeight > window.innerWidth) {
+      rot.classList.add('show');
+      clearTimeout(hint.t);
+      hint.t = setTimeout(function(){ rot.classList.remove('show'); }, 6000);
+    } else {
+      rot.classList.remove('show');
+    }
+  }
+  rot.addEventListener('click', function(){ rot.classList.remove('show'); });
+
+  function relayout(){ fit(); hint(); }
+  window.addEventListener('resize', relayout);
+  window.addEventListener('orientationchange', function(){ setTimeout(relayout, 120); });
+  if (window.visualViewport) window.visualViewport.addEventListener('resize', fit);
+  relayout();
   var start = parseInt((location.hash || '').replace('#',''), 10);
   go(isNaN(start) ? 0 : start - 1);
 })();
