@@ -1,0 +1,1034 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>GeoLibre: A New-Generation Cloud-Native GIS</title>
+<style>
+:root{
+  --bg:#070c17;
+  --bg2:#0d1626;
+  --panel:rgba(255,255,255,.045);
+  --line:rgba(255,255,255,.10);
+  --line2:rgba(255,255,255,.18);
+  --fg:#eaf0fb;
+  --fg2:#a8b8d6;
+  --fg3:#7186a8;
+  --a:#4f9cff;
+  --a2:#2dd4bf;
+  --a3:#f0b429;
+  --w:1280px;
+  --h:720px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#04070e;overflow:hidden;overscroll-behavior:none;-webkit-text-size-adjust:100%}
+body{
+  font-family:"Inter","Helvetica Neue",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,system-ui,sans-serif;
+  color:var(--fg);
+  -webkit-font-smoothing:antialiased;
+  font-feature-settings:"tnum" 1;
+}
+#stage{position:fixed;inset:0;overflow:hidden}
+#deck{position:absolute;left:50%;top:50%;width:var(--w);height:var(--h);transform-origin:center center;-webkit-user-select:none;user-select:none}
+
+.slide{
+  position:absolute;inset:0;width:var(--w);height:var(--h);
+  background:
+    radial-gradient(1100px 620px at 82% -12%, rgba(79,156,255,.16), transparent 62%),
+    radial-gradient(900px 560px at -8% 108%, rgba(45,212,191,.10), transparent 60%),
+    linear-gradient(160deg,var(--bg2) 0%, var(--bg) 62%);
+  display:none;overflow:hidden;
+}
+.slide.active{display:block}
+.inner{position:absolute;inset:0;padding:56px 76px 74px}
+
+/* ---------- typography ---------- */
+.kicker{font-size:15px;letter-spacing:.20em;color:var(--a);font-weight:700;margin-bottom:14px;text-transform:uppercase}
+h2{font-size:40px;line-height:1.2;font-weight:800;letter-spacing:-.01em}
+h2 .thin{font-weight:400;color:var(--fg2)}
+.sub{margin-top:12px;font-size:20px;line-height:1.65;color:var(--fg2);max-width:1010px}
+.rule{height:3px;width:66px;background:linear-gradient(90deg,var(--a),var(--a2));border-radius:3px;margin:20px 0 26px}
+p{line-height:1.7}
+strong{color:#fff;font-weight:700}
+em{font-style:normal;color:var(--a2);font-weight:600}
+code{font-family:ui-monospace,"JetBrains Mono","SF Mono",Menlo,Consolas,monospace;font-size:.88em;background:rgba(79,156,255,.14);color:#bcd8ff;padding:2px 7px;border-radius:6px;white-space:nowrap}
+
+/* ---------- layout helpers ---------- */
+.cols{display:grid;gap:20px}
+.c2{grid-template-columns:1fr 1fr}
+.c3{grid-template-columns:repeat(3,1fr)}
+.c4{grid-template-columns:repeat(4,1fr)}
+.c5{grid-template-columns:repeat(5,1fr)}
+.c21{grid-template-columns:1.15fr .85fr}
+.c12{grid-template-columns:.85fr 1.15fr}
+.gap12{gap:12px}
+.gap14{gap:14px}
+.mt8{margin-top:8px}.mt14{margin-top:14px}.mt20{margin-top:20px}.mt26{margin-top:26px}
+
+.card{
+  background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 22px;
+}
+.card h3{font-size:20px;font-weight:700;margin-bottom:9px;display:flex;align-items:center;gap:9px}
+.card p{font-size:16.5px;color:var(--fg2);line-height:1.62}
+.card.accent{border-color:rgba(79,156,255,.42);background:rgba(79,156,255,.09)}
+.card.teal{border-color:rgba(45,212,191,.36);background:rgba(45,212,191,.08)}
+.logocard{text-align:center;padding:22px 16px}
+.logocard img{width:78px;height:78px;object-fit:contain;display:block;margin:0 auto 14px}
+.logocard h4{font-size:18.5px;font-weight:700;color:#fff;margin-bottom:8px;letter-spacing:.01em}
+.metarow{display:flex;justify-content:center;align-items:center;gap:7px;margin-bottom:11px;flex-wrap:wrap}
+.stars{display:inline-flex;align-items:center;gap:5px;font-size:13.5px;font-weight:700;color:#f3c765;background:rgba(240,180,41,.13);border:1px solid rgba(240,180,41,.34);padding:3px 10px;border-radius:999px;font-variant-numeric:tabular-nums}
+.year{display:inline-flex;align-items:center;font-size:13.5px;font-weight:700;color:#a9cfff;background:rgba(79,156,255,.13);border:1px solid rgba(79,156,255,.36);padding:3px 10px;border-radius:999px;font-variant-numeric:tabular-nums}
+.stars svg{width:12px;height:12px;fill:#f0b429}
+.logocard p{font-size:15.5px;line-height:1.55}
+.card h3 img.mini{width:44px;height:44px;object-fit:contain;flex:0 0 auto;margin:-4px 0}
+.brandmark{width:92px;height:92px;object-fit:contain;display:block;margin-bottom:22px}
+.brandmark.sm{width:64px;height:64px;margin-bottom:16px}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--a);flex:0 0 auto}
+.dot.t{background:var(--a2)}.dot.y{background:var(--a3)}
+
+ul{list-style:none}
+li{position:relative;padding-left:20px;margin-bottom:11px;font-size:18.5px;line-height:1.62;color:var(--fg2)}
+li::before{content:"";position:absolute;left:2px;top:.72em;width:6px;height:6px;border-radius:50%;background:var(--a);opacity:.85}
+li.t::before{background:var(--a2)}
+ul.tight li{margin-bottom:7px;font-size:17px}
+ul.big li{font-size:21px;margin-bottom:16px}
+
+table{width:100%;border-collapse:collapse;font-size:16px}
+th{text-align:left;font-weight:700;color:var(--a);padding:10px 12px;border-bottom:1.5px solid rgba(79,156,255,.35);font-size:15px;letter-spacing:.02em}
+td{padding:9px 12px;border-bottom:1px solid var(--line);color:var(--fg2);vertical-align:top;line-height:1.5}
+td:first-child{color:var(--fg);font-weight:600}
+tr:last-child td{border-bottom:none}
+
+.num{font-size:30px;font-weight:800;color:var(--a);line-height:1}
+.kpi{text-align:center;padding:16px 10px}
+.kpi .v{font-size:34px;font-weight:800;background:linear-gradient(180deg,#fff,#9dc6ff);-webkit-background-clip:text;background-clip:text;color:transparent;line-height:1.1}
+.kpi .k{font-size:14.5px;color:var(--fg3);margin-top:6px}
+
+.tag{display:inline-block;font-size:13.5px;padding:5px 12px;border-radius:999px;border:1px solid var(--line2);color:var(--fg2);margin:0 7px 8px 0}
+.tag.a{border-color:rgba(79,156,255,.5);color:#a9cfff;background:rgba(79,156,255,.1)}
+.tag.t{border-color:rgba(45,212,191,.45);color:#8ee9dc;background:rgba(45,212,191,.09)}
+
+.fig{border-radius:12px;overflow:hidden;border:1px solid var(--line);background:#0a1120;display:flex;align-items:center;justify-content:center}
+.fig img{display:block;width:100%;height:100%;object-fit:cover}
+.fig.contain img{object-fit:contain}
+.cap{font-size:14px;color:var(--fg3);margin-top:9px;line-height:1.5}
+
+.compact .card{padding:15px 18px}
+.compact .card h3{margin-bottom:7px}
+.compact .card p{font-size:16px;line-height:1.58}
+.xcompact .card{padding:14px 17px}
+.xcompact .card h3{margin-bottom:6px;font-size:19px}
+.xcompact .card p{font-size:15.5px;line-height:1.52}
+.xcompact .cols{gap:12px}
+.xcompact .mt14{margin-top:11px}
+.xcompact li{margin-bottom:8px}
+.pill{display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:700;color:#04101f;background:linear-gradient(90deg,var(--a2),#7ef0dd);padding:6px 14px;border-radius:999px;letter-spacing:.03em}
+.pill.demo{background:linear-gradient(90deg,#ffb347,var(--a3));}
+
+/* ---------- special slides ---------- */
+.cover .inner{display:flex;flex-direction:row;align-items:center;gap:58px;padding:0 92px}
+.cover .cmain{flex:1;min-width:0}
+.cover .cqr{flex:0 0 232px;text-align:center}
+.cover .cqr .qbox{background:#fff;border-radius:16px;padding:14px;box-shadow:0 10px 40px rgba(0,0,0,.45);width:-moz-fit-content;width:fit-content;margin:0 auto;display:flex;align-items:center;justify-content:center}
+.cover .cqr img{display:block;width:204px;height:204px;image-rendering:pixelated}
+.cover .cqr .qlab{margin-top:14px;font-size:15px;color:var(--fg2);line-height:1.7}
+.cover .cqr .qlab code{font-size:12.5px;display:inline-block;margin-top:5px}
+.cover h1{font-size:52px;font-weight:800;line-height:1.18;letter-spacing:-.02em}
+.cover h1 .g{background:linear-gradient(90deg,#7ab8ff,var(--a2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.cover .en{margin-top:16px;font-size:20px;color:var(--fg3);letter-spacing:.04em}
+.cover .meta{margin-top:44px;font-size:19px;color:var(--fg2);line-height:2}
+.cover .meta b{color:#fff;font-weight:700}
+
+.section .inner{display:flex;flex-direction:column;justify-content:center;padding:0 92px}
+.section .big{font-size:120px;font-weight:800;color:rgba(79,156,255,.20);line-height:.9;letter-spacing:-.04em}
+.section h2{font-size:52px;margin-top:8px}
+.section .sub{font-size:21px;margin-top:18px}
+
+.end .inner{display:flex;flex-direction:column;justify-content:center;padding:0 92px}
+
+/* ---------- chrome ---------- */
+.foot{position:absolute;left:76px;right:76px;bottom:26px;display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--fg3);letter-spacing:.03em}
+.foot .b{display:flex;align-items:center;gap:9px}
+.foot .logo{width:19px;height:19px;object-fit:contain;opacity:.9}
+.cover .foot,.section .foot{display:none}
+#bar{position:fixed;left:0;bottom:0;height:3px;background:linear-gradient(90deg,var(--a),var(--a2));transition:width .25s ease;z-index:50}
+#hud{position:fixed;top:14px;right:16px;display:flex;gap:8px;align-items:center;z-index:60;font-size:12.5px;color:var(--fg3)}
+#hud .btn{background:rgba(255,255,255,.06);border:1px solid var(--line);color:var(--fg2);padding:5px 10px;border-radius:8px;cursor:pointer;font:inherit}
+#hud .btn:hover{background:rgba(79,156,255,.18);color:#fff}
+
+#toc{position:fixed;inset:0;background:rgba(4,7,14,.94);z-index:80;display:none;padding:38px 46px;overflow:auto}
+#toc.on{display:block}
+#toc h4{font-size:15px;letter-spacing:.2em;color:var(--a);margin-bottom:18px}
+#toc ol{list-style:none;columns:3;column-gap:34px}
+#toc li{padding-left:0;margin-bottom:9px;font-size:15px;cursor:pointer;color:var(--fg2);break-inside:avoid}
+#toc li::before{display:none}
+#toc li:hover{color:var(--a)}
+#toc li span{display:inline-block;width:30px;color:var(--fg3);font-variant-numeric:tabular-nums}
+#toc li.cur{color:#fff;font-weight:700}
+
+
+#help{position:fixed;left:16px;bottom:14px;z-index:60;font-size:12px;color:rgba(255,255,255,.22)}
+
+#nav{position:fixed;right:14px;bottom:14px;display:none;gap:10px;z-index:60}
+#nav button{width:48px;height:48px;border-radius:14px;border:1px solid var(--line2);background:rgba(12,20,36,.86);color:var(--fg);font-size:20px;line-height:1;cursor:pointer;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+#nav button:active{background:rgba(79,156,255,.3)}
+
+#rotate{position:fixed;left:50%;bottom:82px;transform:translateX(-50%);z-index:65;display:none;
+  background:rgba(12,20,36,.92);border:1px solid var(--line2);color:var(--fg2);font-size:14px;
+  padding:10px 18px;border-radius:999px;white-space:nowrap;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+
+@media (pointer:coarse),(max-width:900px){
+  #nav{display:flex}
+  #help{display:none}
+  #hud .btn{padding:9px 14px;font-size:14px}
+}
+@media (max-width:900px) and (orientation:portrait){
+  #rotate.show{display:block}
+}
+@media (max-width:900px){
+  #toc{padding:24px 20px}
+  #toc ol{columns:1}
+  #toc li{font-size:16px;padding:6px 0}
+}
+
+@media print{
+  html,body{overflow:visible;background:#fff}
+  #stage{position:static;display:block;overflow:visible}
+  #deck{position:static!important;left:auto;top:auto;transform:none!important;width:var(--w);height:auto}
+  .slide{display:block!important;position:relative;page-break-after:always;break-after:page;width:var(--w);height:var(--h)}
+  #hud,#bar,#toc,#help,#nav,#rotate{display:none!important}
+  @page{size:1280px 720px;margin:0}
+}
+</style>
+</head>
+<body>
+
+<div id="stage"><div id="deck">
+
+<!-- 1 ---------------------------------------------------------------- -->
+<section class="slide cover">
+  <div class="inner">
+    <div class="cmain">
+      <img class="brandmark" src="images/geolibre.webp" alt="GeoLibre">
+      <div class="kicker">Cloud-Native Geospatial</div>
+      <h1>A New-Generation<br>Cloud-Native GIS: <span class="g">GeoLibre</span></h1>
+      <div class="en">Free, open source, and it runs everywhere: browser, desktop, mobile, and Jupyter</div>
+      <div class="meta">
+        <b>Qiusheng Wu</b><br>
+        University of Tennessee, Knoxville &middot; Open Geospatial Solutions<br>
+        <span style="color:var(--fg3)">geolibre.app &nbsp;&middot;&nbsp; github.com/opengeos/GeoLibre &nbsp;&middot;&nbsp; MIT License</span>
+      </div>
+    </div>
+    <div class="cqr">
+      <div class="qbox"><img src="images/qrcode-en.png" alt="Scan to open these slides"></div>
+      <div class="qlab">Scan to open these slides<br><code>go.gishub.org/geolibre-slides-en</code></div>
+    </div>
+  </div>
+</section>
+
+<!-- 2 ---------------------------------------------------------------- -->
+<section class="slide">
+  <div class="inner">
+    <div class="kicker">About the speaker</div>
+    <h2>One thread through my open-source work: <span class="thin">fewer steps between people and geospatial tools</span></h2>
+    <div class="rule"></div>
+    <div class="cols c5 gap14">
+      <div class="card logocard"><img src="images/geemap.webp" alt="geemap"><h4>geemap</h4><div class="metarow"><span class="year">2020</span><span class="stars"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 .8l2.2 4.6 5 .7-3.6 3.5.9 5L8 12.3 3.5 14.6l.9-5L.8 6.1l5-.7z"/></svg>4.0k</span></div><p>Earth Engine in Python and Jupyter</p></div>
+      <div class="card logocard"><img src="images/leafmap.webp" alt="leafmap"><h4>leafmap</h4><div class="metarow"><span class="year">2021</span><span class="stars"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 .8l2.2 4.6 5 .7-3.6 3.5.9 5L8 12.3 3.5 14.6l.9-5L.8 6.1l5-.7z"/></svg>3.8k</span></div><p>Interactive mapping, no cloud vendor required</p></div>
+      <div class="card logocard"><img src="images/samgeo.webp" alt="samgeo"><h4>samgeo</h4><div class="metarow"><span class="year">2023</span><span class="stars"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 .8l2.2 4.6 5 .7-3.6 3.5.9 5L8 12.3 3.5 14.6l.9-5L.8 6.1l5-.7z"/></svg>4.1k</span></div><p>SAM applied to remote sensing imagery</p></div>
+      <div class="card logocard"><img src="images/geoai.webp" alt="GeoAI"><h4>GeoAI</h4><div class="metarow"><span class="year">2025</span><span class="stars"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 .8l2.2 4.6 5 .7-3.6 3.5.9 5L8 12.3 3.5 14.6l.9-5L.8 6.1l5-.7z"/></svg>3.3k</span></div><p>Deep learning toolkit for geospatial data</p></div>
+      <div class="card logocard"><img src="images/geolibre.webp" alt="GeoLibre"><h4>GeoLibre</h4><div class="metarow"><span class="year">2026</span><span class="stars"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 .8l2.2 4.6 5 .7-3.6 3.5.9 5L8 12.3 3.5 14.6l.9-5L.8 6.1l5-.7z"/></svg>6.8k</span></div><p>A full GIS anyone can just open</p></div>
+    </div>
+    <div class="cap" style="margin-top:12px">Blue is the first public release year, gold is GitHub stars (snapshot, August 2026): geemap 4,018 &middot; leafmap 3,763 &middot; segment-geospatial 4,122 &middot; GeoAI 3,327 &middot; GeoLibre 6,777</div>
+    <div class="sub mt14">Every one of these projects does the same thing: <strong>it removes steps between the technology and the person using it</strong>. GeoLibre goes furthest, because it removes installation itself.</div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre &middot; A cloud-native GIS that runs everywhere</div><div class="n"></div></div>
+</section>
+
+<!-- 3 ---------------------------------------------------------------- -->
+<section class="slide">
+  <div class="inner">
+    <div class="kicker">Agenda</div>
+    <h2>Four parts</h2>
+    <div class="rule"></div>
+    <div class="cols c2 gap14">
+      <div class="card"><h3><span class="num">01</span></h3><p style="font-size:19px;color:var(--fg)"><strong>Why cloud-native geospatial</strong></p><p class="mt8">Three shifts: formats, protocols, runtimes</p></div>
+      <div class="card"><h3><span class="num">02</span></h3><p style="font-size:19px;color:var(--fg)"><strong>What GeoLibre is</strong></p><p class="mt8">Scope, stack, and the platforms it ships on</p></div>
+      <div class="card accent"><h3><span class="num" style="color:var(--a3)">03</span></h3><p style="font-size:19px;color:var(--fg)"><strong>Capabilities and live demos</strong></p><p class="mt8">Seven real cases, from loading data to AI segmentation</p></div>
+      <div class="card"><h3><span class="num">04</span></h3><p style="font-size:19px;color:var(--fg)"><strong>Lessons from open source</strong></p><p class="mt8">What actually drives adoption</p></div>
+    </div>
+    <div class="sub mt26">Part three is live in the browser. Please interrupt with questions as we go.</div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre &middot; A cloud-native GIS that runs everywhere</div><div class="n"></div></div>
+</section>
+
+<!-- 4 ---------------------------------------------------------------- -->
+<section class="slide section">
+  <div class="inner">
+    <div class="big">01</div>
+    <h2>Why "cloud-native geospatial"</h2>
+    <div class="sub">The deepest change of the past decade was not an algorithm. It was <strong>how data is accessed</strong>.</div>
+  </div>
+</section>
+
+<!-- 5 ---------------------------------------------------------------- -->
+<section class="slide">
+  <div class="inner">
+    <div class="kicker">The problem</div>
+    <h2>Four points of friction in the traditional workflow</h2>
+    <div class="rule"></div>
+    <div class="cols c2 gap14">
+      <div class="card"><h3><span class="dot y"></span>Download as a toll gate</h3><p>To look at the buildings in one county, you first pull a 40 GB national archive. Disk, bandwidth, and time are spent before the data is even in hand.</p></div>
+      <div class="card"><h3><span class="dot y"></span>Formats as islands</h3><p>Ten-character field names, encoding surprises, a 2 GB ceiling per file. Thirty years on, Shapefile still costs practitioners real hours.</p></div>
+      <div class="card"><h3><span class="dot y"></span>Servers as cost</h3><p>Publishing one web map means GeoServer, PostGIS, a tile cache, and someone to keep them alive. For a lab or a small agency that is a hard barrier.</p></div>
+      <div class="card"><h3><span class="dot y"></span>Software as a barrier</h3><p>Installers, licences, versions, and GPU drivers are genuine obstacles in a teaching lab, on a locked-down network, or on a borrowed laptop.</p></div>
+    </div>
+    <div class="sub mt26">All four share one default assumption: <em>move the data to where the computation is</em>.</div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre &middot; A cloud-native GIS that runs everywhere</div><div class="n"></div></div>
+</section>
+
+<!-- 6 ---------------------------------------------------------------- -->
+<section class="slide">
+  <div class="inner">
+    <div class="kicker">The core idea</div>
+    <h2>Cloud-native geospatial: <span class="thin">leave the data where it is, read only what you need</span></h2>
+    <div class="rule"></div>
+    <div class="cols c3 gap14">
+      <div class="card"><h3><span class="dot"></span>Object storage</h3><p>The data simply sits on static storage such as S3, GCS, or Azure Blob. No GIS server software is running anywhere.</p></div>
+      <div class="card"><h3><span class="dot"></span>HTTP range requests</h3><p>HTTP already lets a client say "just bytes 1024 through 8192 of that file". A twenty-year-old part of the spec is the foundation of all of this.</p></div>
+      <div class="card"><h3><span class="dot"></span>Self-indexing formats</h3><p>The file is chunked and indexed internally, so reading a few tens of KB of header tells the client exactly which byte range it wants.</p></div>
+    </div>
+    <div class="card accent mt26" style="padding:26px 30px">
+      <p style="font-size:24px;color:#fff;line-height:1.6"><strong>Put together, they turn a file itself into a randomly addressable database.</strong></p>
+      <p class="mt8" style="font-size:18px">Opening a 100 GB dataset stops meaning "download 100 GB" and starts meaning "issue a few dozen range requests and pull back a few MB".</p>
+    </div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre &middot; A cloud-native GIS that runs everywhere</div><div class="n"></div></div>
+</section>
+
+<!-- 7 ---------------------------------------------------------------- -->
+<section class="slide">
+  <div class="inner">
+    <div class="kicker">The format stack</div>
+    <h2>The cloud-native formats</h2>
+    <div class="rule" style="margin-bottom:18px"></div>
+    <table>
+      <tr><th style="width:15%">Format</th><th style="width:22%">Replaces</th><th style="width:35%">Key mechanism</th><th>Typical use</th></tr>
+      <tr><td>COG</td><td>GeoTIFF + image server</td><td>Internal tiling + overview pyramid</td><td>Satellite imagery, DEMs</td></tr>
+      <tr><td>GeoParquet</td><td>Shapefile / File GDB</td><td>Columnar + row-group stats + bbox</td><td>Massive vector, attribute analysis</td></tr>
+      <tr><td>PMTiles</td><td>Tile directory / tile server</td><td>Single-file tile archive + directory index</td><td>Global basemaps, vector tiles</td></tr>
+      <tr><td>STAC</td><td>Bespoke metadata per provider</td><td>One JSON catalog and search API</td><td>Imagery discovery and time series</td></tr>
+      <tr><td>Zarr / Icechunk</td><td>Large NetCDF / HDF files</td><td>Chunked N-D arrays + versioned commits</td><td>Weather, ocean, data cubes</td></tr>
+      <tr><td>FlatGeobuf</td><td>GeoJSON</td><td>Streamable binary + packed R-tree</td><td>Mid-size vector, streamed</td></tr>
+      <tr><td>Apache Iceberg</td><td>Classic warehouse tables</td><td>Table format + manifests + snapshots</td><td>Enterprise spatial data lakes</td></tr>
+    </table>
+    <div class="cap mt14">GeoLibre reads every one of these natively, and every read happens inside the browser.</div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre &middot; A cloud-native GIS that runs everywhere</div><div class="n"></div></div>
+</section>
+
+<!-- 8 ---------------------------------------------------------------- -->
+<section class="slide">
+  <div class="inner">
+    <div class="kicker">How it works</div>
+    <h2>What actually happens on one read</h2>
+    <div class="rule" style="margin-bottom:14px"></div>
+    <svg viewBox="0 0 1128 428" style="width:100%;height:auto">
+      <defs>
+        <linearGradient id="g1" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#4f9cff"/><stop offset="1" stop-color="#2dd4bf"/></linearGradient>
+        <marker id="ah" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#4f9cff"/></marker>
+        <marker id="ah2" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#2dd4bf"/></marker>
+      </defs>
+
+      <rect x="0" y="20" width="300" height="330" rx="16" fill="rgba(79,156,255,.09)" stroke="rgba(79,156,255,.45)"/>
+      <text x="26" y="62" fill="#4f9cff" font-size="13" font-weight="700" font-family="inherit" letter-spacing="2">CLIENT</text>
+      <text x="26" y="98" fill="#eaf0fb" font-size="23" font-weight="700" font-family="inherit">Browser</text>
+      <text x="26" y="146" fill="#a8b8d6" font-size="16" font-family="inherit">1. Read the header</text>
+      <text x="46" y="172" fill="#7186a8" font-size="14.5" font-family="inherit">(tens of KB, holds the index)</text>
+      <text x="26" y="212" fill="#a8b8d6" font-size="16" font-family="inherit">2. Work out which chunks</text>
+      <text x="46" y="238" fill="#a8b8d6" font-size="16" font-family="inherit">the current view needs</text>
+      <text x="26" y="280" fill="#a8b8d6" font-size="16" font-family="inherit">3. Ask for those byte ranges</text>
+      <text x="26" y="322" fill="#a8b8d6" font-size="16" font-family="inherit">4. Decode, render, analyze</text>
+
+      <line x1="308" y1="140" x2="472" y2="140" stroke="#4f9cff" stroke-width="2.4" marker-end="url(#ah)"/>
+      <text x="312" y="128" fill="#8fc0ff" font-size="13" font-family="ui-monospace,monospace">Range: bytes=&hellip;</text>
+      <line x1="472" y1="232" x2="308" y2="232" stroke="#2dd4bf" stroke-width="2.4" marker-end="url(#ah2)"/>
+      <text x="312" y="256" fill="#7ee0d3" font-size="13" font-family="ui-monospace,monospace">206 Partial Content</text>
+
+      <rect x="480" y="20" width="300" height="330" rx="16" fill="rgba(255,255,255,.05)" stroke="rgba(255,255,255,.16)"/>
+      <text x="506" y="62" fill="#7186a8" font-size="13" font-weight="700" font-family="inherit" letter-spacing="2">STORAGE</text>
+      <text x="506" y="98" fill="#eaf0fb" font-size="21" font-weight="700" font-family="inherit">Object storage</text>
+      <text x="506" y="130" fill="#7186a8" font-size="13" font-family="inherit">S3 &middot; GCS &middot; Azure Blob &middot; CDN &middot; GitHub Pages</text>
+      <text x="506" y="158" fill="#7186a8" font-size="14.5" font-family="inherit">No GIS server software running</text>
+
+      <rect x="506" y="192" width="248" height="34" rx="7" fill="rgba(79,156,255,.16)" stroke="rgba(79,156,255,.4)"/>
+      <text x="518" y="215" fill="#bcd8ff" font-size="13.5" font-family="ui-monospace,monospace">HEADER / INDEX</text>
+      <rect x="506" y="236" width="38" height="34" rx="6" fill="rgba(255,255,255,.06)" stroke="rgba(255,255,255,.14)"/>
+      <rect x="548" y="236" width="38" height="34" rx="6" fill="url(#g1)" opacity=".9"/>
+      <rect x="590" y="236" width="38" height="34" rx="6" fill="rgba(255,255,255,.06)" stroke="rgba(255,255,255,.14)"/>
+      <rect x="632" y="236" width="38" height="34" rx="6" fill="url(#g1)" opacity=".9"/>
+      <rect x="674" y="236" width="38" height="34" rx="6" fill="rgba(255,255,255,.06)" stroke="rgba(255,255,255,.14)"/>
+      <rect x="716" y="236" width="38" height="34" rx="6" fill="rgba(255,255,255,.06)" stroke="rgba(255,255,255,.14)"/>
+      <text x="506" y="298" fill="#7186a8" font-size="13.5" font-family="inherit">Coloured blocks = the bytes actually read.</text>
+      <text x="506" y="320" fill="#7186a8" font-size="13.5" font-family="inherit">The rest is never transferred.</text>
+
+      <rect x="828" y="20" width="300" height="330" rx="16" fill="rgba(45,212,191,.08)" stroke="rgba(45,212,191,.38)"/>
+      <text x="854" y="62" fill="#2dd4bf" font-size="13" font-weight="700" font-family="inherit" letter-spacing="2">RESULT</text>
+      <text x="854" y="98" fill="#eaf0fb" font-size="23" font-weight="700" font-family="inherit">Result</text>
+      <text x="854" y="142" fill="#a8b8d6" font-size="15.5" font-family="inherit">&middot; The dataset can be terabytes</text>
+      <text x="854" y="180" fill="#a8b8d6" font-size="15.5" font-family="inherit">&middot; Transfer scales with the view</text>
+      <text x="854" y="218" fill="#a8b8d6" font-size="15.5" font-family="inherit">&middot; Zero server ops, zero licences</text>
+      <text x="854" y="256" fill="#a8b8d6" font-size="15.5" font-family="inherit">&middot; Source data never moves</text>
+      <text x="854" y="294" fill="#a8b8d6" font-size="15.5" font-family="inherit">&middot; Unlimited concurrent readers</text>
+
+      <text x="0" y="392" fill="#eaf0fb" font-size="17.5" font-family="inherit">COG, GeoParquet, PMTiles, Zarr and FlatGeobuf all follow this one principle.</text>
+      <text x="0" y="418" fill="#eaf0fb" font-size="17.5" font-family="inherit">They differ only in how the index is laid out and how the file is chunked.</text>
+    </svg>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre &middot; A cloud-native GIS that runs everywhere</div><div class="n"></div></div>
+</section>
+
+<!-- 9 ---------------------------------------------------------------- -->
+<section class="slide">
+  <div class="inner">
+    <div class="kicker">The other half of the story</div>
+    <h2>The browser became a real compute platform</h2>
+    <div class="rule"></div>
+    <div class="cols c2 gap14">
+      <div class="card"><h3><span class="dot"></span>WebAssembly (WASM)</h3><p>C, C++ and Rust compile to near-native speed inside the browser. GDAL-class algorithms and a full geoprocessing toolbox can finally move into a tab.</p></div>
+      <div class="card"><h3><span class="dot"></span>DuckDB-WASM + Spatial</h3><p>A complete analytical database running in the page, issuing spatial SQL straight against remote GeoParquet, with column and row-group pruning for free.</p></div>
+      <div class="card"><h3><span class="dot t"></span>WebGL / WebGPU</h3><p>Rendering goes to the local GPU. Millions of features, point clouds, 3D tiles and raster reprojection all become ordinary interactive operations.</p></div>
+      <div class="card"><h3><span class="dot t"></span>Local capability APIs</h3><p>File System Access lets the browser read large local files directly, and Web Serial reaches an external GNSS receiver.</p></div>
+    </div>
+    <div class="sub mt26">Once all four landed, "GIS in the browser" stopped being a demo and became a production tool. <em>GeoLibre was designed from scratch on that premise.</em></div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre &middot; A cloud-native GIS that runs everywhere</div><div class="n"></div></div>
+</section>
+
+<!-- 10 --------------------------------------------------------------- -->
+<section class="slide section">
+  <div class="inner">
+    <div class="big">02</div>
+    <h2>What GeoLibre is</h2>
+    <div class="sub">A free, open-source, lightweight cloud-native GIS platform. First released 27 May 2026, MIT licensed, currently v2.7.0.</div>
+  </div>
+</section>
+
+<!-- 11 --------------------------------------------------------------- -->
+<section class="slide">
+  <div class="inner">
+    <div class="kicker">Scope</div>
+    <h2>Four things you do not need</h2>
+    <div class="rule"></div>
+    <div class="cols c4 gap14">
+      <div class="card accent"><h3>No account</h3><p>Open the page and it is ready. No sign-up, no quota, no trial period.</p></div>
+      <div class="card accent"><h3>No server</h3><p>No GeoServer, no database, no tile cache, and therefore nothing to operate.</p></div>
+      <div class="card accent"><h3>No upload</h3><p>Computation happens locally and data stays in the browser by default, which makes privacy and compliance straightforward.</p></div>
+      <div class="card accent"><h3>No install</h3><p>The web build installs nothing. Add the desktop app when you want more, and the interface is identical.</p></div>
+    </div>
+    <div class="cols c2 gap14 mt26">
+      <div class="card"><h3><span class="dot t"></span>Where it is strong</h3><p>Opening cloud-native formats instantly, in-browser analysis and SQL, fast cartography and sharing, teaching, and embedding into your own system.</p></div>
+      <div class="card"><h3><span class="dot y"></span>What it is not</h3><p>It is not a replacement for QGIS or ArcGIS. A few slides from now I will be specific about the relationship, and about the gaps.</p></div>
+    </div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre &middot; A cloud-native GIS that runs everywhere</div><div class="n"></div></div>
+</section>
+
+<!-- 12 --------------------------------------------------------------- -->
+<section class="slide">
+  <div class="inner">
+    <div class="kicker">The stack</div>
+    <h2>One codebase, four layers</h2>
+    <div class="rule"></div>
+    <div class="cols c2 gap14">
+      <div class="card"><h3><span class="dot"></span>Rendering</h3><p><strong>MapLibre GL JS</strong> draws vector and raster basemaps, <strong>deck.gl</strong> handles 3D tiles, point clouds, Gaussian splats and large raster overlays. Both share one camera and one WebGL context.</p></div>
+      <div class="card"><h3><span class="dot"></span>Data</h3><p><strong>DuckDB-WASM Spatial</strong> reads most vector formats and provides spatial SQL. geotiff.js handles COGs and multiband imagery, and dedicated renderers handle Zarr and NetCDF cubes.</p></div>
+      <div class="card"><h3><span class="dot t"></span>Analysis</h3><p>A <strong>WebAssembly geoprocessing runtime</strong> carries 1,000+ tools. Turf.js covers light vector work, Pyodide runs GeoPandas in the page, and an optional Python sidecar adds GDAL and rasterio on desktop.</p></div>
+      <div class="card"><h3><span class="dot t"></span>Shell</h3><p><strong>Tauri v2</strong> packages the same React and TypeScript frontend as Windows, macOS and Linux desktop apps and as native iOS and Android apps, at a fraction of an Electron bundle.</p></div>
+    </div>
+    <div class="mt26">
+      <span class="tag a">React</span><span class="tag a">TypeScript</span><span class="tag a">MapLibre GL JS</span><span class="tag a">deck.gl</span><span class="tag t">DuckDB-WASM</span><span class="tag t">WebAssembly</span><span class="tag t">Tauri v2</span><span class="tag">Zustand</span><span class="tag">Vite</span><span class="tag">FastAPI (optional)</span>
+    </div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre &middot; A cloud-native GIS that runs everywhere</div><div class="n"></div></div>
+</section>
+
+<!-- 13 --------------------------------------------------------------- -->
+<section class="slide">
+  <div class="inner">
+    <div class="kicker">How it ships</div>
+    <h2>One codebase, six form factors</h2>
+    <div class="rule"></div>
+    <div class="cols c3 gap14">
+      <div class="card"><h3><span class="dot"></span>Browser</h3><p><code>web.geolibre.app</code><br>Nothing to install, and installable as a PWA that works offline.</p></div>
+      <div class="card"><h3><span class="dot"></span>Desktop</h3><p>Windows, macOS and Linux installers, plus Mac App Store, Homebrew, winget, AUR and Flatpak.</p></div>
+      <div class="card"><h3><span class="dot"></span>Mobile</h3><p>Native apps on the App Store and Google Play, built from the same codebase with Tauri v2.</p></div>
+      <div class="card"><h3><span class="dot t"></span>Jupyter</h3><p><code>pip install geolibre</code><br>The whole app as an anywidget in a notebook, with two-way project sync.</p></div>
+      <div class="card"><h3><span class="dot t"></span>R</h3><p>The <code>geolibre</code> R package for RStudio, Quarto, R Markdown and Shiny.</p></div>
+      <div class="card"><h3><span class="dot t"></span>Embed / self-host</h3><p>iframe embed, a versioned postMessage API and a typed client, plus Docker for private deployment.</p></div>
+    </div>
+    <div class="sub mt26">There is also a Chrome extension, <strong>Open Data in GeoLibre</strong>: it collects the dataset links (GeoJSON, GeoParquet, PMTiles) and map services (WMS, WMTS, WFS, OGC API Features, ArcGIS, XYZ) on whatever page you are viewing and opens the ones you pick on one map.</div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre &middot; A cloud-native GIS that runs everywhere</div><div class="n"></div></div>
+</section>
+
+<!-- 14 --------------------------------------------------------------- -->
+<section class="slide">
+  <div class="inner">
+    <div class="kicker">Design principles</div>
+    <h2>Four principles</h2>
+    <div class="rule"></div>
+    <ul class="big">
+      <li><strong>Local first.</strong> Computation happens on the user's device and data does not leave it by default. This is not a privacy switch you can turn off, it is what the architecture produces.</li>
+      <li><strong>Open formats first.</strong> The project file is human-readable <code>.geolibre.json</code>. It goes in version control, scripts can write it, an AI can write it, and it locks nobody in.</li>
+      <li class="t"><strong>Sharing is built in.</strong> Any project exports to <em>a single offline HTML file</em> that opens on a double click with no server, or becomes a link, or embeds into an existing system.</li>
+      <li class="t"><strong>Progressive enhancement.</strong> Every core capability works with no server at all. A Python sidecar or a self-hosted service adds on top of that, never the other way around.</li>
+    </ul>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre &middot; A cloud-native GIS that runs everywhere</div><div class="n"></div></div>
+</section>
+
+<!-- 15 --------------------------------------------------------------- -->
+<section class="slide compact xcompact">
+  <div class="inner">
+    <div class="kicker">Positioning</div>
+    <h2>Next to QGIS and ArcGIS: <span class="thin">complementary, not a replacement</span></h2>
+    <div class="rule"></div>
+    <div class="cols c21 gap14">
+      <div>
+        <div class="card"><h3><span class="dot"></span>Pro camera and phone camera</h3><p>QGIS is the professional camera: mature, powerful, extensible. GeoLibre is the phone camera: light, always at hand, shareable the moment you are done. Phone cameras did not replace pro cameras, they multiplied the number of people taking pictures.</p></div>
+        <div class="card mt14"><h3><span class="dot y"></span>Where the gaps honestly are</h3><p>Plugin depth, decades of specialist tools, projection and topology edge cases, stability on very large projects. QGIS leads clearly on all of these.</p></div>
+        <div class="card teal mt14"><h3><span class="dot t"></span>And they interoperate</h3><p>GeoLibre imports QGIS projects (<code>.qgs</code> / <code>.qgz</code>) and ArcGIS Pro projects (<code>.aprx</code> / <code>.mapx</code>), keeping layers, groups, styling and the view.</p></div>
+      </div>
+      <div class="fig contain"><img src="images/QGIS-GeoLibre.webp" alt="QGIS and GeoLibre as a professional camera and a phone camera"></div>
+    </div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre &middot; A cloud-native GIS that runs everywhere</div><div class="n"></div></div>
+</section>
+
+<!-- 16 --------------------------------------------------------------- -->
+<section class="slide section">
+  <div class="inner">
+    <div class="big">03</div>
+    <h2>Capabilities and live demos</h2>
+    <div class="sub mt20" style="max-width:1040px">
+      <span class="tag a">1. Loading data, attribute table, geometry editing</span>
+      <span class="tag a">2. 100 GB vector streamed with DuckDB + GeoParquet</span>
+      <span class="tag a">3. PMTiles global vector</span>
+      <span class="tag t">4. 3D Tiles and LiDAR point clouds</span>
+      <span class="tag t">5. 1,000+ geoprocessing tools in the browser</span>
+      <span class="tag t">6. Model Builder: tools wired into a reusable graph</span>
+      <span class="tag t">7. SamGeo: one text prompt, imagery to vectors</span>
+    </div>
+    <div class="sub">Every one of these runs live, in the browser.</div>
+  </div>
+</section>
+
+<!-- 17 --------------------------------------------------------------- -->
+<section class="slide">
+  <div class="inner">
+    <span class="pill demo">DEMO 01</span>
+    <h2 class="mt14">Loading data, editing attributes, editing geometry</h2>
+    <div class="rule"></div>
+    <div class="cols c2 gap14">
+      <div class="card"><h3><span class="dot"></span>Loading</h3><p>Drag a local GeoPackage, Shapefile, GeoParquet, FlatGeobuf, KML/KMZ, GPX, CAD drawing or OSM PBF onto the map. DuckDB-WASM Spatial parses it in the browser and reprojects it to WGS84.</p></div>
+      <div class="card"><h3><span class="dot"></span>Attribute table</h3><p>Sort, filter, multi-select highlighting, field calculator, virtual fields (expression-backed columns), attribute joins, editor tracking, plus built-in histogram, scatter and box charts and field statistics.</p></div>
+      <div class="card"><h3><span class="dot t"></span>Symbology and labels</h3><p>Single, categorized, graduated, expression and rule-based renderers, proportional symbols, heatmaps, clustering and diagram symbols. The legend is generated from the symbology, and styles import and export as SLD, QML or Mapbox style JSON.</p></div>
+      <div class="card"><h3><span class="dot t"></span>Geometry editing</h3><p>The GeoEditor plugin does topological digitizing (a polygon shares its neighbour's edge, so no slivers or overlaps), pulls the features in the current view into the editor, and writes edits back to GeoPackage, GeoJSON or PostGIS.</p></div>
+    </div>
+    <div class="sub mt26">The point to prove: <em>load, query, edit and export is a closed loop</em>. This is not a read-only viewer.</div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre &middot; A cloud-native GIS that runs everywhere</div><div class="n"></div></div>
+</section>
+
+<!-- 18 --------------------------------------------------------------- -->
+<section class="slide">
+  <div class="inner">
+    <div class="kicker">Demo 02 &middot; how it works</div>
+    <h2>Why 100 GB of vector data pans smoothly in a browser</h2>
+    <div class="rule"></div>
+    <div class="cols c3 gap14">
+      <div class="card"><h3><span class="num">1</span> Column pruning</h3><p>GeoParquet is columnar. Rendering building height reads the height and geometry columns only. The other dozens of columns are never transferred.</p></div>
+      <div class="card"><h3><span class="num">2</span> Row-group pruning</h3><p>Every row group carries its own bounding box and statistics. DuckDB reads the metadata first and skips whole row groups that miss the current view.</p></div>
+      <div class="card"><h3><span class="num">3</span> Fetch only the hits</h3><p>What survives is fetched as byte ranges, then decompressed, decoded and rendered entirely inside the browser.</p></div>
+    </div>
+    <div class="card accent mt26" style="padding:26px 30px">
+      <p style="font-size:23px;color:#fff;line-height:1.6"><strong>Performance is set by the features in the current view and the columns you asked for, not by the size of the dataset.</strong></p>
+      <p class="mt8" style="font-size:18px">That is the whole reason streaming a 100 GB dataset works, and there is no magic in it. The real ceiling is tab memory, which limits <em>how many features are resident at once</em>, not how big the dataset is.</p>
+    </div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre &middot; A cloud-native GIS that runs everywhere</div><div class="n"></div></div>
+</section>
+
+<!-- 19 --------------------------------------------------------------- -->
+<section class="slide">
+  <div class="inner">
+    <span class="pill demo">DEMO 02</span>
+    <h2 class="mt14">Streaming 100 GB of vector data live</h2>
+    <div class="rule"></div>
+    <div class="cols c2 gap14">
+      <div class="card"><h3><span class="dot"></span>The data</h3><p><strong>Overture Maps</strong> global buildings, transportation, places and divisions, plus open GeoParquet datasets on <strong>Source Cooperative</strong>, all hosted as plain files on object storage.</p></div>
+      <div class="card"><h3><span class="dot"></span>On screen</h3><p>Open the Overture plugin, pick the buildings theme, zoom to a city, and watch features stream in with the viewport. Open the network panel and you see a series of range requests, not one bulk download.</p></div>
+      <div class="card"><h3><span class="dot t"></span>Then analyze it</h3><p>Switch to the <strong>SQL Workspace</strong> and write spatial SQL against that same remote GeoParquet: filter by area, join to another layer, aggregate, and add the result as a new layer.</p></div>
+      <div class="card"><h3><span class="dot t"></span>Three engines</h3><p>DuckDB Spatial by default, <strong>PGlite</strong> for in-browser PostGIS, and <strong>Apache Sedona</strong>, switchable in the same panel. Apache Iceberg tables are supported too.</p></div>
+    </div>
+    <div class="sub mt26">In one line: <em>the data is in the cloud, the index is in the file, the compute is in the browser, and the server is just a static file host.</em></div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre &middot; A cloud-native GIS that runs everywhere</div><div class="n"></div></div>
+</section>
+
+<!-- 20 --------------------------------------------------------------- -->
+<section class="slide compact xcompact">
+  <div class="inner">
+    <span class="pill demo">DEMO 03</span>
+    <h2 class="mt14">PMTiles: <span class="thin">one file instead of a tile server</span></h2>
+    <div class="rule"></div>
+    <div class="cols c21 gap14">
+      <div>
+        <div class="card"><h3><span class="dot"></span>What it solves</h3><p>Vector tiles are usually either millions of small files or a running tile server. PMTiles packs the pyramid into <strong>one file</strong> with a built-in directory, and the client range-requests the tile it needs.</p></div>
+        <div class="card mt14"><h3><span class="dot t"></span>What that means</h3><p>A global basemap can live on a CDN, on object storage, even on GitHub Pages. Zero operations, unlimited concurrency, and you pay for traffic rather than for servers.</p></div>
+        <div class="card mt14"><h3><span class="dot t"></span>How GeoLibre handles it</h3><p>A vector tile layer holds no local features, so the Style panel <strong>samples the features the viewport already loaded</strong> to fill in fields and value ranges. Categorized and graduated styling and 3D extrusion still work.</p></div>
+      </div>
+      <div class="card accent" style="display:flex;flex-direction:column;justify-content:center">
+        <div class="kpi"><div class="v">One file</div><div class="k">replaces the whole tile directory</div></div>
+        <div class="kpi mt14"><div class="v">Zero servers</div><div class="k">static hosting is enough</div></div>
+        <div class="kpi mt14"><div class="v">Global</div><div class="k">any zoom, read on demand</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre &middot; A cloud-native GIS that runs everywhere</div><div class="n"></div></div>
+</section>
+
+<!-- 21 --------------------------------------------------------------- -->
+<section class="slide">
+  <div class="inner">
+    <span class="pill demo">DEMO 04</span>
+    <h2 class="mt14">3D Tiles, point clouds, and real 3D scenes</h2>
+    <div class="rule" style="margin-bottom:16px"></div>
+    <div class="cols c12 gap14">
+      <div>
+        <ul class="tight">
+          <li><strong>3D Tiles</strong>: photogrammetry and mesh datasets stream in and render on deck.gl over the MapLibre map, including authenticated tilesets via custom headers.</li>
+          <li><strong>LiDAR point clouds</strong>: COPC and LAZ coloured by elevation or classification. The USGS LiDAR plugin clips to an area of interest and downloads COPC.</li>
+          <li><strong>ArcGIS I3S</strong> scene layers (Integrated Mesh and 3D Object) render on deck.gl as well.</li>
+          <li class="t"><strong>Gaussian splats</strong>, glTF/GLB models placed at coordinates, and georeferenced video overlays.</li>
+          <li class="t"><strong>Terrain-aware measurement</strong> in 3D, with a great-circle initial bearing and a 16-point compass label.</li>
+        </ul>
+      </div>
+      <div>
+        <div class="fig" style="height:376px"><img src="images/GeoLibre-demo.webp" alt="3D Tiles rendered on a MapLibre map in GeoLibre"></div>
+        <div class="cap">Photogrammetry delivered as 3D Tiles, rendered over the MapLibre map</div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre &middot; A cloud-native GIS that runs everywhere</div><div class="n"></div></div>
+</section>
+
+<!-- 22 --------------------------------------------------------------- -->
+<section class="slide compact xcompact">
+  <div class="inner">
+    <div class="kicker">Case study</div>
+    <h2>NYC buildings and subways: <span class="thin">the camera holds still, the data grows</span></h2>
+    <div class="rule" style="margin-bottom:16px"></div>
+    <div class="cols c21 gap14">
+      <div class="fig" style="height:372px"><img src="images/nyc-buildings.webp" alt="Manhattan buildings extruded by construction era with subway lines and an auto-generated legend"></div>
+      <div>
+        <div class="card"><h3><span class="dot"></span>What is in this map</h3><p>Manhattan footprints extruded in 3D and coloured by construction era, with MTA subway lines on top. The <strong>legend is generated automatically</strong> from the symbology.</p></div>
+        <div class="card mt14"><h3><span class="dot t"></span>The time slider</h3><p>Running construction year from 1850 to 2025 fills Manhattan in era by era. The timeline drives GeoJSON, vector tiles, PMTiles, COG sequences and Zarr cubes alike.</p></div>
+        <div class="card mt14"><h3><span class="dot t"></span>Open it yourself</h3><p>A real share link: <code>share.geolibre.app/giswqs/nyc-buildings-and-subways</code></p></div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre &middot; A cloud-native GIS that runs everywhere</div><div class="n"></div></div>
+</section>
+
+<!-- 23 --------------------------------------------------------------- -->
+<section class="slide">
+  <div class="inner">
+    <span class="pill demo">DEMO 05</span>
+    <h2 class="mt14">1,000+ geoprocessing tools, <span class="thin">all running in the browser</span></h2>
+    <div class="rule" style="margin-bottom:16px"></div>
+    <div class="cols c12 gap14">
+      <div>
+        <div class="fig" style="height:300px"><img src="images/whitebox.webp" alt="The Whitebox toolbox running in the browser on WebAssembly"></div>
+        <div class="cap">The Whitebox toolbox executes in the browser on a WebAssembly runtime, with no Python sidecar</div>
+      </div>
+      <div>
+        <table style="font-size:15.5px">
+          <tr><th>Category</th><th>Tools</th><th>Examples</th></tr>
+          <tr><td>Vector</td><td>313</td><td>overlays, buffers, joins, topology, generalization</td></tr>
+          <tr><td>Raster</td><td>256</td><td>algebra, filters, reclassification, zonal statistics</td></tr>
+          <tr><td>Remote sensing</td><td>154</td><td>spectral indices, band math, classification, change</td></tr>
+          <tr><td>Hydrology</td><td>100</td><td>depression filling, flow direction, accumulation, basins</td></tr>
+          <tr><td>Terrain</td><td>99</td><td>slope, aspect, hillshade, curvature, viewsheds</td></tr>
+          <tr><td>LiDAR</td><td>65</td><td>filtering, ground classification, DEM/DSM generation</td></tr>
+          <tr><td>Conversion</td><td>49</td><td>to GeoParquet, PMTiles and COG</td></tr>
+          <tr><td>Network</td><td>26</td><td>connectivity, cost distance, routing</td></tr>
+        </table>
+        <div class="cap">From the Whitebox Next Gen suite plus GeoLibre's own WASM tools. Web, desktop and Android all get the same set.</div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre &middot; A cloud-native GIS that runs everywhere</div><div class="n"></div></div>
+</section>
+
+<!-- 24 --------------------------------------------------------------- -->
+<section class="slide compact">
+  <div class="inner">
+    <span class="pill demo">DEMO 06</span>
+    <h2 class="mt14">Model Builder: <span class="thin">tools wired into a reusable graph</span></h2>
+    <div class="rule" style="margin-bottom:16px"></div>
+    <div class="cols c21 gap14">
+      <div>
+        <div class="fig contain" style="height:336px;background:#0a1120"><img src="images/model-builder.webp" alt="A Model Builder graph from DEM through depression filling, flow direction, accumulation and stream extraction to vector, with the result on the map"></div>
+        <div class="cap">Stream network model: <code>dem.tif</code> to depression filling, D8 pointer, flow accumulation, stream extraction, then raster to vector, in one run</div>
+      </div>
+      <div>
+        <div class="card"><h3><span class="dot"></span>An ArcGIS-style canvas</h3><p>Drop tools as nodes and wire one tool's output into the next tool's input. Any intermediate result can be kept as an output when you want it.</p></div>
+        <div class="card mt14"><h3><span class="dot t"></span>Validated before it runs</h3><p>Cycles, missing connections and wrong parameter types are reported before execution. Models save, reload, import and export, and copy out as Python.</p></div>
+        <div class="card mt14"><h3><span class="dot t"></span>AI can author the model</h3><p>Describe the workflow in plain language and the assistant produces a validated graph for review before it runs. All on WebAssembly, no server involved.</p></div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre &middot; A cloud-native GIS that runs everywhere</div><div class="n"></div></div>
+</section>
+
+<!-- 25 --------------------------------------------------------------- -->
+<section class="slide compact xcompact">
+  <div class="inner">
+    <span class="pill demo">DEMO 07</span>
+    <h2 class="mt14">SamGeo: <span class="thin">one prompt turns imagery into vectors</span></h2>
+    <div class="rule" style="margin-bottom:16px"></div>
+    <div class="cols c12 gap14">
+      <div>
+        <div class="card"><h3><span class="dot"></span>This exact run</h3><p>Image <code>uc_berkeley.tif</code>, text-prompt mode, model <code>facebook/sam3.1</code>, prompt is the single word <strong>building</strong>, threshold 0.5. One run returns <strong>375 building features</strong>.</p></div>
+        <div class="card mt14"><h3><span class="dot t"></span>Four ways to prompt</h3><p>Text prompts, foreground and background points clicked on the map, a box dragged to find similar objects, and SAM 2's automatic mask generator.</p></div>
+        <div class="card mt14"><h3><span class="dot y"></span>Being clear about where it runs</h3><p>Results arrive as a <strong>GeoJSON layer</strong> with a per-feature <code>score</code>, ready for the attribute table and export. Inference runs on a separate <code>samgeo-api</code> service (GPU recommended), the only demo today that needs one.</p></div>
+      </div>
+      <div>
+        <div class="fig contain" style="height:330px;background:#0a1120"><img src="images/samgeo-segmentation.webp" alt="The SamGeo panel segmenting buildings from campus aerial imagery with a text prompt"></div>
+        <div class="cap">UC Berkeley campus imagery: 375 buildings from the single prompt <code>building</code>, masks in blue</div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre &middot; A cloud-native GIS that runs everywhere</div><div class="n"></div></div>
+</section>
+
+<!-- 26 --------------------------------------------------------------- -->
+<section class="slide compact">
+  <div class="inner">
+    <div class="kicker">Analysis workflow</div>
+    <h2>SQL Workspace and Processing History</h2>
+    <div class="rule" style="margin-bottom:16px"></div>
+    <div class="cols c21 gap14">
+      <div>
+        <div class="card"><h3><span class="dot"></span>SQL Workspace</h3><p>DuckDB spatial SQL against loaded layers, local files and remote URLs, with table and column autocomplete, sample queries and query history. Results add to the map or export.</p></div>
+        <div class="card mt14"><h3><span class="dot t"></span>Database engines</h3><p>Besides DuckDB Spatial there is PGlite (PostGIS) and Apache Sedona, both in the browser. Apache Iceberg tables read their CRS from the schema and report true row counts from the manifests first.</p></div>
+        <div class="card mt14"><h3><span class="dot t"></span>Processing History</h3><p>Every tool run is recorded, re-runnable with one click, and copyable as the equivalent Python for the Notebook panel or JupyterLite.</p></div>
+      </div>
+      <div>
+        <div class="fig contain" style="height:330px;background:#0a1120"><img src="images/geolibre-sql-workspace.webp" alt="The SQL Workspace docked beside the map running a spatial query"></div>
+        <div class="cap">The SQL Workspace docks beside the map, and query results become layers</div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre &middot; A cloud-native GIS that runs everywhere</div><div class="n"></div></div>
+</section>
+
+<!-- 27 --------------------------------------------------------------- -->
+<section class="slide">
+  <div class="inner">
+    <div class="kicker">Ecosystem</div>
+    <h2>Plugins: <span class="thin">the app is extensible from outside</span></h2>
+    <div class="rule"></div>
+    <div class="cols c3 gap14">
+      <div class="card"><h3><span class="dot"></span>Map capability plugins</h3><p>Swipe compare, time slider, H3 and DGGS grids, elevation profile, directions, Street View and Mapillary, atmosphere and deep-space effects, flight simulator, map recording.</p></div>
+      <div class="card"><h3><span class="dot"></span>Data catalog plugins</h3><p>STAC catalogs and APIs, NASA Earthdata GIS, Planetary Computer, Overture Maps, Source Cooperative, Hugging Face, Natural Earth, GeoLens.</p></div>
+      <div class="card"><h3><span class="dot t"></span>Analysis and editing</h3><p>GeoEditor topological editing and building massing, USGS LiDAR clipping, SamGeo segmentation, GeoAgent.</p></div>
+    </div>
+    <div class="cols c2 gap14 mt20">
+      <div class="card"><h3><span class="dot t"></span>What the plugin API allows</h3><p>Registering right-rail panels, toolbar menus and floating panels; rendering on the host's own deck.gl instance and Zarr renderer; and querying a loaded layer's features read-only instead of re-fetching and re-parsing the source.</p></div>
+      <div class="card"><h3><span class="dot"></span>Distribution</h3><p>A <code>plugin.json</code> manifest, zip install on desktop and web alike, build-time drop-in directories, and the registry at <code>plugins.geolibre.app</code> with version checks and one-click updates.</p></div>
+    </div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre &middot; A cloud-native GIS that runs everywhere</div><div class="n"></div></div>
+</section>
+
+<!-- 28 --------------------------------------------------------------- -->
+<section class="slide compact xcompact">
+  <div class="inner">
+    <div class="kicker">Sharing and embedding</div>
+    <h2>Once it is finished, how do you hand it over</h2>
+    <div class="rule" style="margin-bottom:16px"></div>
+    <div class="cols c12 gap14">
+      <div>
+        <div class="card"><h3><span class="dot"></span>Export as a single HTML file</h3><p>The whole project becomes <strong>one offline HTML file</strong> that opens on a double click, with no server and no network. To a reviewer or a student it is just an attachment.</p></div>
+        <div class="card mt14"><h3><span class="dot"></span>Share links and a readiness check</h3><p>Before upload, every data source is probed and anything a recipient could not load is listed with the reason (needs credentials, no CORS headers, dead link, local path). It informs, it does not block.</p></div>
+        <div class="card mt14"><h3><span class="dot t"></span>Embed into your own system</h3><p><code>maponly</code> for a bare map, <code>layout=viewer</code> for read-only, <code>?data=</code> and <code>?style=</code> deep links, <code>?tool=</code> straight to a tool, plus the versioned postMessage API.</p></div>
+      </div>
+      <div>
+        <div class="fig" style="height:394px"><img src="images/geolibre-embed-maponly.webp" alt="A chrome-free maponly embed"></div>
+        <div class="cap">The maponly embed: no toolbar, no panels, no status bar</div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre &middot; A cloud-native GIS that runs everywhere</div><div class="n"></div></div>
+</section>
+
+<!-- 29 --------------------------------------------------------------- -->
+<section class="slide">
+  <div class="inner">
+    <div class="kicker">Going further</div>
+    <h2>Not limited to Earth</h2>
+    <div class="rule" style="margin-bottom:16px"></div>
+    <div class="cols c4 gap12">
+      <div><div class="fig" style="height:186px"><img src="images/earth.webp" alt="Earth"></div><div class="cap" style="text-align:center">Earth</div></div>
+      <div><div class="fig" style="height:186px"><img src="images/moon.webp" alt="The Moon"></div><div class="cap" style="text-align:center">Moon &middot; LOLA</div></div>
+      <div><div class="fig" style="height:186px"><img src="images/mars.webp" alt="Mars"></div><div class="cap" style="text-align:center">Mars &middot; MOLA</div></div>
+      <div><div class="fig" style="height:186px"><img src="images/pluto.webp" alt="Pluto"></div><div class="cap" style="text-align:center">Pluto &middot; New Horizons</div></div>
+    </div>
+    <div class="cols c2 gap14 mt20">
+      <div class="card"><h3><span class="dot"></span>Planetary basemaps</h3><p>The Moon, Mars, Mercury, Venus, Europa, Ganymede, Callisto, Titan, Pluto and Charon, from OpenPlanetaryMap and USGS Astrogeology.</p></div>
+      <div class="card teal"><h3><span class="dot t"></span>The engineering point</h3><p>Each project carries its own ellipsoid, so distance, area and scale measurements match the body being mapped. Basemap, projection and measurement are configurable rather than Earth hard-coded.</p></div>
+    </div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre &middot; A cloud-native GIS that runs everywhere</div><div class="n"></div></div>
+</section>
+
+<!-- 30 --------------------------------------------------------------- -->
+<section class="slide compact">
+  <div class="inner">
+    <div class="kicker">Deployment</div>
+    <h2>Cross-platform deployment and self-hosting</h2>
+    <div class="rule"></div>
+    <div class="cols c2 gap14">
+      <div class="card"><h3><span class="dot"></span>Docker on your own network</h3><p>One command runs the web build in a container, with optional HTTP Basic Auth. <code>GEOLIBRE_SHARE_URL</code> and <code>GEOLIBRE_COLLAB_URL</code> point sharing at your own servers at container start, and <code>off</code> removes it from the UI entirely.</p></div>
+      <div class="card"><h3><span class="dot"></span>A fully isolated build</h3><p><code>GEOLIBRE_NO_EXTERNAL_CDN=1</code> strips every external CDN reference and makes the few features that genuinely need a remote host <strong>say so up front</strong> rather than failing at the end of a run.</p></div>
+      <div class="card teal"><h3><span class="dot t"></span>UI Profiles</h3><p>Tailor which menus, panels and data sources a deployment shows, so a general-purpose GIS becomes a focused tool for one job, with no code changes and no fork to maintain.</p></div>
+      <div class="card teal"><h3><span class="dot t"></span>Offline and localization</h3><p>Installable as an offline-capable PWA, with a Download Offline Area tool that pre-caches basemap tiles. 18 locale catalogs, including right-to-left Arabic and Persian with a mirrored interface.</p></div>
+    </div>
+    <div class="sub mt26">Self-hosted sharing, accounts and live collaboration have a documented v1 HTTP contract and a FastAPI reference implementation, so an institution can keep every project on its own infrastructure.</div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre &middot; A cloud-native GIS that runs everywhere</div><div class="n"></div></div>
+</section>
+
+<!-- 31 --------------------------------------------------------------- -->
+<section class="slide section">
+  <div class="inner">
+    <div class="big">04</div>
+    <h2>Lessons from open source</h2>
+    <div class="sub">Five projects, and what each one taught me.</div>
+  </div>
+</section>
+
+<!-- 32 --------------------------------------------------------------- -->
+<section class="slide">
+  <div class="inner">
+    <div class="kicker">The lineage</div>
+    <h2>One lesson from each step</h2>
+    <div class="rule"></div>
+    <div class="cols c2 gap14">
+      <div class="card"><h3><img class="mini" src="images/geemap.webp" alt="">geemap</h3><p>Earth Engine brought into Python and Jupyter.<br><em>Lowering the barrier to an existing powerful system is itself enormous value.</em></p></div>
+      <div class="card"><h3><img class="mini" src="images/leafmap.webp" alt="">leafmap</h3><p>Interactive mapping with no commercial cloud underneath.<br><em>Do not lock users to a single backend.</em></p></div>
+      <div class="card"><h3><img class="mini" src="images/samgeo.webp" alt="">segment-geospatial</h3><p>SAM applied to remote sensing imagery.<br><em>When a general model enters a domain, the interface decides adoption more than the model does.</em></p></div>
+      <div class="card accent"><h3><img class="mini" src="images/geolibre.webp" alt="">GeoLibre</h3><p>All of the above, made into an app you simply open.<br><em>Remove installation and the number of users changes by an order of magnitude.</em></p></div>
+    </div>
+    <div class="sub mt26">The whole path has been one thing: <strong>deleting the steps between the technology and the person, one at a time.</strong></div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre &middot; A cloud-native GIS that runs everywhere</div><div class="n"></div></div>
+</section>
+
+<!-- 33 --------------------------------------------------------------- -->
+<section class="slide">
+  <div class="inner">
+    <div class="kicker">What I have learned</div>
+    <h2>What actually drives adoption</h2>
+    <div class="rule"></div>
+    <ul class="big">
+      <li><strong>Free is necessary, not sufficient.</strong> What actually moves the needle is documentation, sample data, video tutorials, reproducible notebooks, and answering issues quickly.</li>
+      <li><strong>Distribution matters as much as code.</strong> A project on PyPI, conda-forge, CRAN, the App Store, Google Play, Microsoft Store, Homebrew, winget and AUR is a different project from one that is only a GitHub repository.</li>
+      <li class="t"><strong>Citability drives academic uptake.</strong> Every release gets a Zenodo DOI, so users can cite it properly in papers, and that feeds back.</li>
+      <li class="t"><strong>Worth saying plainly:</strong> GeoLibre's development pace owes a great deal to AI coding assistants. That is itself a real data point about open source and AI.</li>
+    </ul>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre &middot; A cloud-native GIS that runs everywhere</div><div class="n"></div></div>
+</section>
+
+<!-- 34 --------------------------------------------------------------- -->
+<section class="slide">
+  <div class="inner">
+    <div class="kicker">An invitation</div>
+    <h2>Ways to get involved</h2>
+    <div class="rule"></div>
+    <div class="cols c3 gap14">
+      <div class="card"><h3><span class="dot"></span>Use it and tell me</h3><p>File issues, report bugs, request features. A clear description of a real workflow is often worth more than a patch.</p></div>
+      <div class="card"><h3><span class="dot"></span>Translations</h3><p>18 locales ship today. Reviewing terminology in your own language is the easiest high-impact contribution there is.</p></div>
+      <div class="card"><h3><span class="dot t"></span>Write a plugin</h3><p>Build against the <code>plugin.json</code> contract. No changes to the main repository, and nothing to wait for a merge on.</p></div>
+      <div class="card teal"><h3><span class="dot t"></span>Teach with it</h3><p>Zero install means the lab machines, the borrowed laptop and the student's own device stop being obstacles. One link starts the class.</p></div>
+      <div class="card teal"><h3><span class="dot t"></span>Pilot it at work</h3><p>Docker on an internal network plus UI Profiles makes it cheap to try on one concrete workflow before committing.</p></div>
+      <div class="card"><h3><span class="dot"></span>Sponsor</h3><p>GitHub Sponsors. The project is MIT licensed, and sponsorship funds development, hosting and cross-platform distribution.</p></div>
+    </div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre &middot; A cloud-native GIS that runs everywhere</div><div class="n"></div></div>
+</section>
+
+<!-- 35 --------------------------------------------------------------- -->
+<section class="slide">
+  <div class="inner">
+    <div class="kicker">Summary</div>
+    <h2>Three sentences</h2>
+    <div class="rule"></div>
+    <div class="cols c3 gap14">
+      <div class="card accent" style="padding:28px"><div class="num" style="font-size:40px">01</div><p class="mt14" style="font-size:19px;color:var(--fg);line-height:1.7">Cloud-native formats turn "open a 100 GB dataset" into a few seconds of work, at the cost of a few dozen HTTP range requests.</p></div>
+      <div class="card accent" style="padding:28px"><div class="num" style="font-size:40px">02</div><p class="mt14" style="font-size:19px;color:var(--fg);line-height:1.7">WebAssembly and DuckDB bring full spatial analysis into the browser, so privacy and performance stop being a trade-off.</p></div>
+      <div class="card accent" style="padding:28px"><div class="num" style="font-size:40px">03</div><p class="mt14" style="font-size:19px;color:var(--fg);line-height:1.7">GeoLibre packages both into a free, open-source, cross-platform, zero-install app you can open today.</p></div>
+    </div>
+    <div class="cols c2 gap14 mt26">
+      <div class="card teal"><h3><span class="dot t"></span>For research and teaching</h3><p>A zero-install classroom, a citable open-source tool, and reproducible notebook workflows.</p></div>
+      <div class="card teal"><h3><span class="dot t"></span>For government and industry</h3><p>Deployable on an internal network, data never leaves the machine, the UI can be trimmed, it embeds into existing systems, and MIT puts no limit on commercial use.</p></div>
+    </div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre &middot; A cloud-native GIS that runs everywhere</div><div class="n"></div></div>
+</section>
+
+<!-- 36 --------------------------------------------------------------- -->
+<section class="slide end">
+  <div class="inner">
+    <img class="brandmark sm" src="images/geolibre.webp" alt="GeoLibre">
+    <div class="kicker">Thank you</div>
+    <h2 style="font-size:52px">Questions</h2>
+    <div class="rule" style="margin:22px 0 28px"></div>
+    <div class="cols c2 gap14">
+      <div class="card"><h3><span class="dot"></span>Try it now</h3>
+        <p style="font-size:17.5px;line-height:2">
+          Web app &nbsp;&nbsp;<code>web.geolibre.app</code><br>
+          Docs &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>geolibre.app</code><br>
+          Source &nbsp;&nbsp;&nbsp;&nbsp;<code>github.com/opengeos/GeoLibre</code><br>
+          Examples &nbsp;<code>share.geolibre.app</code>
+        </p>
+      </div>
+      <div class="card"><h3><span class="dot t"></span>Install and cite</h3>
+        <p style="font-size:17.5px;line-height:2">
+          Python &nbsp;&nbsp;&nbsp;<code>pip install geolibre</code><br>
+          Plugins &nbsp;&nbsp;<code>plugins.geolibre.app</code><br>
+          Licence &nbsp;&nbsp;MIT<br>
+          Cite &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>doi.org/10.5281/zenodo.20785400</code>
+        </p>
+      </div>
+    </div>
+    <div class="sub mt26" style="color:var(--fg3);font-size:17px">Wu, Q. (2026). GeoLibre: A lightweight, cloud-native GIS platform for visualizing, exploring, and analyzing geospatial data. Zenodo. https://doi.org/10.5281/zenodo.20785400</div>
+  </div>
+</section>
+</div></div>
+
+<div id="bar"></div>
+<div id="hud">
+  <button class="btn" id="btnToc" title="Contents (L)">Contents</button>
+  <button class="btn" id="btnFs" title="Fullscreen (F)">Fullscreen</button>
+</div>
+<div id="toc"><h4>CONTENTS &middot; CLICK TO JUMP &middot; ESC TO CLOSE</h4><ol id="tocList"></ol></div>
+<div id="help">&larr; &rarr; navigate &middot; F fullscreen &middot; L contents &middot; Ctrl+P export PDF</div>
+<div id="nav"><button id="navPrev" aria-label="Previous slide">‹</button><button id="navNext" aria-label="Next slide">›</button></div>
+<div id="rotate">Turn your phone sideways for a much bigger view</div>
+
+<script>
+(function(){
+  var slides = [].slice.call(document.querySelectorAll('.slide'));
+  var deck = document.getElementById('deck');
+  var bar = document.getElementById('bar');
+  var toc = document.getElementById('toc');
+  var tocList = document.getElementById('tocList');
+  var i = 0;
+
+  function titleOf(s){
+    var h = s.querySelector('h1,h2');
+    var t = h ? h.textContent.replace(/\s+/g,' ').trim() : '(Section)';
+    return t.length > 34 ? t.slice(0,34) + '…' : t;
+  }
+
+  slides.forEach(function(s, n){
+    var f = s.querySelector('.foot .n');
+    if (f) f.textContent = (n+1) + ' / ' + slides.length;
+    var li = document.createElement('li');
+    li.innerHTML = '<span>' + (n+1) + '</span>' + titleOf(s);
+    li.addEventListener('click', function(){ go(n); toc.classList.remove('on'); });
+    tocList.appendChild(li);
+  });
+
+  function fit(){
+    var vv = window.visualViewport;
+    var w = vv ? vv.width : window.innerWidth;
+    var h = vv ? vv.height : window.innerHeight;
+    deck.style.transform = 'translate(-50%,-50%) scale(' + Math.min(w / 1280, h / 720) + ')';
+  }
+
+  function go(n){
+    i = Math.max(0, Math.min(slides.length - 1, n));
+    slides.forEach(function(s, k){ s.classList.toggle('active', k === i); });
+    bar.style.width = ((i + 1) / slides.length * 100) + '%';
+    [].forEach.call(tocList.children, function(li, k){ li.classList.toggle('cur', k === i); });
+    try { location.hash = '#' + (i + 1); } catch (e) {}
+  }
+
+  document.addEventListener('keydown', function(e){
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    var k = e.key;
+    if (k === 'ArrowRight' || k === 'ArrowDown' || k === 'PageDown' || k === ' ') { e.preventDefault(); go(i+1); }
+    else if (k === 'ArrowLeft' || k === 'ArrowUp' || k === 'PageUp') { e.preventDefault(); go(i-1); }
+    else if (k === 'Home') { go(0); }
+    else if (k === 'End') { go(slides.length-1); }
+    else if (k === 'f' || k === 'F') { toggleFs(); }
+    else if (k === 'l' || k === 'L') { toc.classList.toggle('on'); }
+    else if (k === 'Escape') { toc.classList.remove('on'); }
+  });
+
+  function toggleFs(){
+    if (document.fullscreenElement) document.exitFullscreen();
+    else document.documentElement.requestFullscreen && document.documentElement.requestFullscreen();
+  }
+
+  document.getElementById('btnFs').addEventListener('click', toggleFs);
+  document.getElementById('btnToc').addEventListener('click', function(){ toc.classList.toggle('on'); });
+
+  var nav = document.getElementById('nav');
+  document.getElementById('navPrev').addEventListener('click', function(){ go(i-1); });
+  document.getElementById('navNext').addEventListener('click', function(){ go(i+1); });
+
+  // swipe to change slides (passive: native pinch-zoom and scrolling still work)
+  var tx = 0, ty = 0, tt = 0;
+  document.addEventListener('touchstart', function(e){
+    if (e.touches.length !== 1) return;
+    tx = e.touches[0].clientX; ty = e.touches[0].clientY; tt = Date.now();
+  }, { passive: true });
+  document.addEventListener('touchend', function(e){
+    if (!tt || toc.classList.contains('on')) return;
+    var t = e.changedTouches[0], dx = t.clientX - tx, dy = t.clientY - ty;
+    if (Date.now() - tt < 700 && Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.5) go(dx < 0 ? i + 1 : i - 1);
+    tt = 0;
+  }, { passive: true });
+
+  // one-time "turn your phone" hint, dismissed by tap or by rotating
+  var rot = document.getElementById('rotate');
+  function hint(){
+    if (window.innerWidth < 900 && window.innerHeight > window.innerWidth) {
+      rot.classList.add('show');
+      clearTimeout(hint.t);
+      hint.t = setTimeout(function(){ rot.classList.remove('show'); }, 6000);
+    } else {
+      rot.classList.remove('show');
+    }
+  }
+  rot.addEventListener('click', function(){ rot.classList.remove('show'); });
+
+  function relayout(){ fit(); hint(); }
+  window.addEventListener('resize', relayout);
+  window.addEventListener('orientationchange', function(){ setTimeout(relayout, 120); });
+  if (window.visualViewport) window.visualViewport.addEventListener('resize', fit);
+  relayout();
+  var start = parseInt((location.hash || '').replace('#',''), 10);
+  go(isNaN(start) ? 0 : start - 1);
+})();
+</script>
+</body>
+</html>
