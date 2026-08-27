@@ -1,0 +1,962 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>新一代云原生地理空间信息平台：GeoLibre</title>
+<style>
+:root{
+  --bg:#070c17;
+  --bg2:#0d1626;
+  --panel:rgba(255,255,255,.045);
+  --line:rgba(255,255,255,.10);
+  --line2:rgba(255,255,255,.18);
+  --fg:#eaf0fb;
+  --fg2:#a8b8d6;
+  --fg3:#7186a8;
+  --a:#4f9cff;
+  --a2:#2dd4bf;
+  --a3:#f0b429;
+  --w:1280px;
+  --h:720px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#04070e;overflow:hidden}
+body{
+  font-family:"Noto Sans SC","Source Han Sans SC","PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color:var(--fg);
+  -webkit-font-smoothing:antialiased;
+  font-feature-settings:"tnum" 1;
+}
+#stage{position:fixed;inset:0;display:grid;place-items:center}
+#deck{width:var(--w);height:var(--h);position:relative;transform-origin:center center}
+
+.slide{
+  position:absolute;inset:0;width:var(--w);height:var(--h);
+  background:
+    radial-gradient(1100px 620px at 82% -12%, rgba(79,156,255,.16), transparent 62%),
+    radial-gradient(900px 560px at -8% 108%, rgba(45,212,191,.10), transparent 60%),
+    linear-gradient(160deg,var(--bg2) 0%, var(--bg) 62%);
+  display:none;overflow:hidden;
+}
+.slide.active{display:block}
+.inner{position:absolute;inset:0;padding:56px 76px 74px}
+
+/* ---------- typography ---------- */
+.kicker{font-size:15px;letter-spacing:.20em;color:var(--a);font-weight:700;margin-bottom:14px;text-transform:uppercase}
+h2{font-size:40px;line-height:1.2;font-weight:800;letter-spacing:-.01em}
+h2 .thin{font-weight:400;color:var(--fg2)}
+.sub{margin-top:12px;font-size:20px;line-height:1.65;color:var(--fg2);max-width:1010px}
+.rule{height:3px;width:66px;background:linear-gradient(90deg,var(--a),var(--a2));border-radius:3px;margin:20px 0 26px}
+p{line-height:1.7}
+strong{color:#fff;font-weight:700}
+em{font-style:normal;color:var(--a2);font-weight:600}
+code{font-family:ui-monospace,"JetBrains Mono","SF Mono",Menlo,Consolas,monospace;font-size:.88em;background:rgba(79,156,255,.14);color:#bcd8ff;padding:2px 7px;border-radius:6px;white-space:nowrap}
+
+/* ---------- layout helpers ---------- */
+.cols{display:grid;gap:20px}
+.c2{grid-template-columns:1fr 1fr}
+.c3{grid-template-columns:repeat(3,1fr)}
+.c4{grid-template-columns:repeat(4,1fr)}
+.c5{grid-template-columns:repeat(5,1fr)}
+.c21{grid-template-columns:1.15fr .85fr}
+.c12{grid-template-columns:.85fr 1.15fr}
+.gap12{gap:12px}
+.gap14{gap:14px}
+.mt8{margin-top:8px}.mt14{margin-top:14px}.mt20{margin-top:20px}.mt26{margin-top:26px}
+
+.card{
+  background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 22px;
+}
+.card h3{font-size:20px;font-weight:700;margin-bottom:9px;display:flex;align-items:center;gap:9px}
+.card p{font-size:16.5px;color:var(--fg2);line-height:1.62}
+.card.accent{border-color:rgba(79,156,255,.42);background:rgba(79,156,255,.09)}
+.card.teal{border-color:rgba(45,212,191,.36);background:rgba(45,212,191,.08)}
+.logocard{text-align:center;padding:22px 16px}
+.logocard img{width:78px;height:78px;object-fit:contain;display:block;margin:0 auto 14px}
+.logocard h4{font-size:18.5px;font-weight:700;color:#fff;margin-bottom:8px;letter-spacing:.01em}
+.metarow{display:flex;justify-content:center;align-items:center;gap:7px;margin-bottom:11px;flex-wrap:wrap}
+.stars{display:inline-flex;align-items:center;gap:5px;font-size:13.5px;font-weight:700;color:#f3c765;background:rgba(240,180,41,.13);border:1px solid rgba(240,180,41,.34);padding:3px 10px;border-radius:999px;font-variant-numeric:tabular-nums}
+.year{display:inline-flex;align-items:center;font-size:13.5px;font-weight:700;color:#a9cfff;background:rgba(79,156,255,.13);border:1px solid rgba(79,156,255,.36);padding:3px 10px;border-radius:999px;font-variant-numeric:tabular-nums}
+.stars svg{width:12px;height:12px;fill:#f0b429}
+.logocard p{font-size:15.5px;line-height:1.55}
+.card h3 img.mini{width:44px;height:44px;object-fit:contain;flex:0 0 auto;margin:-4px 0}
+.brandmark{width:92px;height:92px;object-fit:contain;display:block;margin-bottom:22px}
+.brandmark.sm{width:64px;height:64px;margin-bottom:16px}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--a);flex:0 0 auto}
+.dot.t{background:var(--a2)}.dot.y{background:var(--a3)}
+
+ul{list-style:none}
+li{position:relative;padding-left:20px;margin-bottom:11px;font-size:18.5px;line-height:1.62;color:var(--fg2)}
+li::before{content:"";position:absolute;left:2px;top:.72em;width:6px;height:6px;border-radius:50%;background:var(--a);opacity:.85}
+li.t::before{background:var(--a2)}
+ul.tight li{margin-bottom:7px;font-size:17px}
+ul.big li{font-size:21px;margin-bottom:16px}
+
+table{width:100%;border-collapse:collapse;font-size:16px}
+th{text-align:left;font-weight:700;color:var(--a);padding:10px 12px;border-bottom:1.5px solid rgba(79,156,255,.35);font-size:15px;letter-spacing:.02em}
+td{padding:9px 12px;border-bottom:1px solid var(--line);color:var(--fg2);vertical-align:top;line-height:1.5}
+td:first-child{color:var(--fg);font-weight:600}
+tr:last-child td{border-bottom:none}
+
+.num{font-size:30px;font-weight:800;color:var(--a);line-height:1}
+.kpi{text-align:center;padding:16px 10px}
+.kpi .v{font-size:34px;font-weight:800;background:linear-gradient(180deg,#fff,#9dc6ff);-webkit-background-clip:text;background-clip:text;color:transparent;line-height:1.1}
+.kpi .k{font-size:14.5px;color:var(--fg3);margin-top:6px}
+
+.tag{display:inline-block;font-size:13.5px;padding:5px 12px;border-radius:999px;border:1px solid var(--line2);color:var(--fg2);margin:0 7px 8px 0}
+.tag.a{border-color:rgba(79,156,255,.5);color:#a9cfff;background:rgba(79,156,255,.1)}
+.tag.t{border-color:rgba(45,212,191,.45);color:#8ee9dc;background:rgba(45,212,191,.09)}
+
+.fig{border-radius:12px;overflow:hidden;border:1px solid var(--line);background:#0a1120;display:flex;align-items:center;justify-content:center}
+.fig img{display:block;width:100%;height:100%;object-fit:cover}
+.fig.contain img{object-fit:contain}
+.cap{font-size:14px;color:var(--fg3);margin-top:9px;line-height:1.5}
+
+.compact .card{padding:15px 18px}
+.compact .card h3{margin-bottom:7px}
+.compact .card p{font-size:16px;line-height:1.58}
+.pill{display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:700;color:#04101f;background:linear-gradient(90deg,var(--a2),#7ef0dd);padding:6px 14px;border-radius:999px;letter-spacing:.03em}
+.pill.demo{background:linear-gradient(90deg,#ffb347,var(--a3));}
+
+/* ---------- special slides ---------- */
+.cover .inner{display:flex;flex-direction:column;justify-content:center;padding:0 92px}
+.cover h1{font-size:62px;font-weight:800;line-height:1.18;letter-spacing:-.02em}
+.cover h1 .g{background:linear-gradient(90deg,#7ab8ff,var(--a2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.cover .en{margin-top:16px;font-size:20px;color:var(--fg3);letter-spacing:.04em}
+.cover .meta{margin-top:44px;font-size:19px;color:var(--fg2);line-height:2}
+.cover .meta b{color:#fff;font-weight:700}
+
+.section .inner{display:flex;flex-direction:column;justify-content:center;padding:0 92px}
+.section .big{font-size:120px;font-weight:800;color:rgba(79,156,255,.20);line-height:.9;letter-spacing:-.04em}
+.section h2{font-size:52px;margin-top:8px}
+.section .sub{font-size:21px;margin-top:18px}
+
+.end .inner{display:flex;flex-direction:column;justify-content:center;padding:0 92px}
+
+/* ---------- chrome ---------- */
+.foot{position:absolute;left:76px;right:76px;bottom:26px;display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--fg3);letter-spacing:.03em}
+.foot .b{display:flex;align-items:center;gap:9px}
+.foot .logo{width:19px;height:19px;object-fit:contain;opacity:.9}
+.cover .foot,.section .foot{display:none}
+#bar{position:fixed;left:0;bottom:0;height:3px;background:linear-gradient(90deg,var(--a),var(--a2));transition:width .25s ease;z-index:50}
+#hud{position:fixed;top:14px;right:16px;display:flex;gap:8px;align-items:center;z-index:60;font-size:12.5px;color:var(--fg3)}
+#hud .btn{background:rgba(255,255,255,.06);border:1px solid var(--line);color:var(--fg2);padding:5px 10px;border-radius:8px;cursor:pointer;font:inherit}
+#hud .btn:hover{background:rgba(79,156,255,.18);color:#fff}
+
+#toc{position:fixed;inset:0;background:rgba(4,7,14,.94);z-index:80;display:none;padding:38px 46px;overflow:auto}
+#toc.on{display:block}
+#toc h4{font-size:15px;letter-spacing:.2em;color:var(--a);margin-bottom:18px}
+#toc ol{list-style:none;columns:3;column-gap:34px}
+#toc li{padding-left:0;margin-bottom:9px;font-size:15px;cursor:pointer;color:var(--fg2);break-inside:avoid}
+#toc li::before{display:none}
+#toc li:hover{color:var(--a)}
+#toc li span{display:inline-block;width:30px;color:var(--fg3);font-variant-numeric:tabular-nums}
+#toc li.cur{color:#fff;font-weight:700}
+
+
+#help{position:fixed;left:16px;bottom:14px;z-index:60;font-size:12px;color:rgba(255,255,255,.22)}
+
+@media print{
+  html,body{overflow:visible;background:#fff}
+  #stage{position:static;display:block}
+  #deck{transform:none!important;width:var(--w);height:auto}
+  .slide{display:block!important;position:relative;page-break-after:always;break-after:page;width:var(--w);height:var(--h)}
+  #hud,#bar,#toc,#help{display:none!important}
+  @page{size:1280px 720px;margin:0}
+}
+</style>
+</head>
+<body>
+
+<div id="stage"><div id="deck">
+
+<!-- 1 ---------------------------------------------------------------- -->
+<section class="slide cover">
+  <div class="inner">
+    <img class="brandmark" src="images/geolibre.webp" alt="GeoLibre">
+    <div class="kicker">云原生地理空间 · Cloud-Native Geospatial</div>
+    <h1>新一代云原生<br>地理空间信息平台：<span class="g">GeoLibre</span></h1>
+    <div class="en">A Free, Open-Source, Cloud-Native GIS That Runs Everywhere</div>
+    <div class="meta">
+      <b>吴秋生</b><br>
+      田纳西大学诺克斯维尔分校 · opengeos 开源组织<br>
+      <span style="color:var(--fg3)">geolibre.app &nbsp;·&nbsp; github.com/opengeos/GeoLibre &nbsp;·&nbsp; MIT License</span>
+    </div>
+  </div>
+</section>
+
+<!-- 2 ---------------------------------------------------------------- -->
+<section class="slide">
+  <div class="inner">
+    <div class="kicker">关于讲者</div>
+    <h2>我的开源项目的发展主线：<span class="thin">把地理空间技术送到更多人手上</span></h2>
+    <div class="rule"></div>
+    <div class="cols c5 gap14">
+      <div class="card logocard"><img src="images/geemap.webp" alt="geemap"><h4>geemap</h4><div class="metarow"><span class="year">2020</span><span class="stars"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 .8l2.2 4.6 5 .7-3.6 3.5.9 5L8 12.3 3.5 14.6l.9-5L.8 6.1l5-.7z"/></svg>4.0k</span></div><p>Earth Engine 的 Python 与 Jupyter 接口</p></div>
+      <div class="card logocard"><img src="images/leafmap.webp" alt="leafmap"><h4>leafmap</h4><div class="metarow"><span class="year">2021</span><span class="stars"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 .8l2.2 4.6 5 .7-3.6 3.5.9 5L8 12.3 3.5 14.6l.9-5L.8 6.1l5-.7z"/></svg>3.8k</span></div><p>不绑定商业云平台的交互式制图库</p></div>
+      <div class="card logocard"><img src="images/samgeo.webp" alt="segment-geospatial"><h4>samgeo</h4><div class="metarow"><span class="year">2023</span><span class="stars"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 .8l2.2 4.6 5 .7-3.6 3.5.9 5L8 12.3 3.5 14.6l.9-5L.8 6.1l5-.7z"/></svg>4.1k</span></div><p>把 SAM 用到遥感影像分割上</p></div>
+      <div class="card logocard"><img src="images/geoai.webp" alt="GeoAI"><h4>GeoAI</h4><div class="metarow"><span class="year">2025</span><span class="stars"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 .8l2.2 4.6 5 .7-3.6 3.5.9 5L8 12.3 3.5 14.6l.9-5L.8 6.1l5-.7z"/></svg>3.3k</span></div><p>面向地理空间的深度学习工具集</p></div>
+      <div class="card logocard accent"><img src="images/geolibre.webp" alt="GeoLibre"><h4>GeoLibre</h4><div class="metarow"><span class="year">2026</span><span class="stars"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 .8l2.2 4.6 5 .7-3.6 3.5.9 5L8 12.3 3.5 14.6l.9-5L.8 6.1l5-.7z"/></svg>6.8k</span></div><p>人人可直接打开的完整 GIS 应用</p></div>
+    </div>
+    <div class="cap" style="margin-top:12px">蓝色为首个公开发布年份，黄色为 GitHub Star 数（2026 年 8 月快照）：geemap 4,018 · leafmap 3,763 · segment-geospatial 4,122 · GeoAI 3,327 · GeoLibre 6,777</div>
+    <div class="sub mt14">这些项目有一个共同点：<strong>降低到达使用者的步骤数</strong>。GeoLibre 是这条路上目前走得最远的一个，它把"安装"这一步彻底去掉了。</div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre · 新一代云原生地理空间信息平台</div><div class="n"></div></div>
+</section>
+
+<!-- 3 ---------------------------------------------------------------- -->
+<section class="slide">
+  <div class="inner">
+    <div class="kicker">报告导览</div>
+    <h2>四个部分</h2>
+    <div class="rule"></div>
+    <div class="cols c2 gap14">
+      <div class="card"><h3><span class="num">01</span></h3><p style="font-size:19px;color:var(--fg)"><strong>为什么需要云原生地理空间</strong></p><p class="mt8">格式、协议与运行时的三重变化</p></div>
+      <div class="card"><h3><span class="num">02</span></h3><p style="font-size:19px;color:var(--fg)"><strong>GeoLibre 是什么</strong></p><p class="mt8">定位、技术栈、跨平台形态</p></div>
+      <div class="card accent"><h3><span class="num" style="color:var(--a3)">03</span></h3><p style="font-size:19px;color:var(--fg)"><strong>核心能力与现场演示</strong></p><p class="mt8">七个真实案例，从数据加载到 AI 分割</p></div>
+      <div class="card"><h3><span class="num">04</span></h3><p style="font-size:19px;color:var(--fg)"><strong>开源项目的发展经验</strong></p><p class="mt8">开源如何真正推动技术普及</p></div>
+    </div>
+    <div class="sub mt26">第三部分是现场演示，七个真实案例。</div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre · 新一代云原生地理空间信息平台</div><div class="n"></div></div>
+</section>
+
+<!-- 4 ---------------------------------------------------------------- -->
+<section class="slide section">
+  <div class="inner">
+    <div class="big">01</div>
+    <h2>为什么是"云原生地理空间"</h2>
+    <div class="sub">过去十年，地理空间领域最深刻的变化不是某个算法，而是<strong>数据的访问方式</strong>。</div>
+  </div>
+</section>
+
+<!-- 5 ---------------------------------------------------------------- -->
+<section class="slide">
+  <div class="inner">
+    <div class="kicker">问题</div>
+    <h2>传统地理空间工作流的四个摩擦点</h2>
+    <div class="rule"></div>
+    <div class="cols c2 gap14">
+      <div class="card"><h3><span class="dot y"></span>下载即门槛</h3><p>要看一个县的建筑物，先下载全国 40 GB 的压缩包；磁盘、带宽和时间在数据到手之前就先被消耗掉了。</p></div>
+      <div class="card"><h3><span class="dot y"></span>格式即孤岛</h3><p>Shapefile 的十字符字段名、编码问题、单文件 2 GB 上限，三十年后仍在日常消耗从业者的时间。</p></div>
+      <div class="card"><h3><span class="dot y"></span>服务器即成本</h3><p>发布一张 Web 地图，需要 GeoServer、PostGIS、瓦片缓存和运维；对课题组和基层单位来说，这是一道硬门槛。</p></div>
+      <div class="card"><h3><span class="dot y"></span>软件即门槛</h3><p>桌面 GIS 的安装、授权、版本与显卡驱动，在教学机房、政府内网和临时借用的电脑上都是真实的障碍。</p></div>
+    </div>
+    <div class="sub mt26">这四点的共同根源是同一个默认假设：<em>先把数据搬到计算的地方</em>。</div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre · 新一代云原生地理空间信息平台</div><div class="n"></div></div>
+</section>
+
+<!-- 6 ---------------------------------------------------------------- -->
+<section class="slide">
+  <div class="inner">
+    <div class="kicker">核心思想</div>
+    <h2>云原生地理空间：<span class="thin">数据不动，只取所需</span></h2>
+    <div class="rule"></div>
+    <div class="cols c3 gap14">
+      <div class="card"><h3><span class="dot"></span>对象存储</h3><p>数据静静躺在 S3 / GCS / Azure Blob 这样的静态存储上，没有任何 GIS 服务软件在跑。</p></div>
+      <div class="card"><h3><span class="dot"></span>HTTP Range 请求</h3><p>HTTP 协议本身就允许"只要这个文件的第 1024 到 8192 字节"。这条二十多年前的老规范，是整套体系的地基。</p></div>
+      <div class="card"><h3><span class="dot"></span>自带索引的文件格式</h3><p>文件内部预先分块并写好索引，客户端读几十 KB 的头就知道自己要的那一块在第几个字节。</p></div>
+    </div>
+    <div class="card accent mt26" style="padding:26px 30px">
+      <p style="font-size:24px;color:#fff;line-height:1.6"><strong>三者合起来的效果：把一个文件本身变成了一个可以被随机访问的数据库。</strong></p>
+      <p class="mt8" style="font-size:18px">于是"打开一份 100 GB 的数据集"不再意味着下载 100 GB，而是发出几十个 Range 请求、取回几 MB。</p>
+    </div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre · 新一代云原生地理空间信息平台</div><div class="n"></div></div>
+</section>
+
+<!-- 7 ---------------------------------------------------------------- -->
+<section class="slide">
+  <div class="inner">
+    <div class="kicker">格式栈</div>
+    <h2>新一代云原生数据格式</h2>
+    <div class="rule" style="margin-bottom:18px"></div>
+    <table>
+      <tr><th style="width:15%">格式</th><th style="width:22%">替代的传统方案</th><th style="width:35%">关键机制</th><th>典型用途</th></tr>
+      <tr><td>COG</td><td>GeoTIFF + 影像服务器</td><td>内部分块 + 多级金字塔概览</td><td>遥感影像、DEM</td></tr>
+      <tr><td>GeoParquet</td><td>Shapefile / File GDB</td><td>列式存储 + 行组统计 + 空间边界</td><td>海量矢量、属性分析</td></tr>
+      <tr><td>PMTiles</td><td>瓦片目录 / 瓦片服务</td><td>单文件瓦片归档 + 内置目录索引</td><td>全球底图、矢量瓦片</td></tr>
+      <tr><td>STAC</td><td>各家自定义元数据</td><td>统一的 JSON 影像目录与检索 API</td><td>影像发现与时序检索</td></tr>
+      <tr><td>Zarr / Icechunk</td><td>大 NetCDF / HDF 文件</td><td>分块多维数组 + 版本化事务</td><td>气象海洋、数据立方体</td></tr>
+      <tr><td>FlatGeobuf</td><td>GeoJSON</td><td>流式二进制 + 打包空间索引</td><td>中等规模矢量流式读取</td></tr>
+      <tr><td>Apache Iceberg</td><td>传统数据仓库表</td><td>表格式 + 清单元数据 + 快照</td><td>企业级空间数据湖</td></tr>
+    </table>
+    <div class="cap mt14">以上格式 GeoLibre 全部原生支持，读取全部发生在浏览器内。</div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre · 新一代云原生地理空间信息平台</div><div class="n"></div></div>
+</section>
+
+<!-- 8 ---------------------------------------------------------------- -->
+<section class="slide">
+  <div class="inner">
+    <div class="kicker">原理</div>
+    <h2>一次按需读取，实际发生了什么</h2>
+    <div class="rule" style="margin-bottom:14px"></div>
+    <svg viewBox="0 0 1128 428" style="width:100%;height:auto">
+      <defs>
+        <linearGradient id="g1" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#4f9cff"/><stop offset="1" stop-color="#2dd4bf"/></linearGradient>
+        <marker id="ah" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#4f9cff"/></marker>
+        <marker id="ah2" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#2dd4bf"/></marker>
+      </defs>
+
+      <!-- 1. browser -->
+      <rect x="0" y="20" width="300" height="330" rx="16" fill="rgba(79,156,255,.09)" stroke="rgba(79,156,255,.45)"/>
+      <text x="26" y="62" fill="#4f9cff" font-size="13" font-weight="700" font-family="inherit" letter-spacing="2">CLIENT</text>
+      <text x="26" y="98" fill="#eaf0fb" font-size="23" font-weight="700" font-family="inherit">浏览器</text>
+      <text x="26" y="146" fill="#a8b8d6" font-size="16.5" font-family="inherit">1. 读文件头，取回索引</text>
+      <text x="46" y="174" fill="#7186a8" font-size="15" font-family="inherit">（只有几十 KB）</text>
+      <text x="26" y="214" fill="#a8b8d6" font-size="16.5" font-family="inherit">2. 按当前视窗与缩放级别</text>
+      <text x="46" y="242" fill="#a8b8d6" font-size="16.5" font-family="inherit">算出需要哪些数据块</text>
+      <text x="26" y="282" fill="#a8b8d6" font-size="16.5" font-family="inherit">3. 只请求那几段字节区间</text>
+      <text x="26" y="322" fill="#a8b8d6" font-size="16.5" font-family="inherit">4. 本地解码 · 渲染 · 分析</text>
+
+      <!-- arrows -->
+      <line x1="308" y1="140" x2="472" y2="140" stroke="#4f9cff" stroke-width="2.4" marker-end="url(#ah)"/>
+      <text x="312" y="128" fill="#8fc0ff" font-size="13" font-family="ui-monospace,monospace">Range: bytes=…</text>
+      <line x1="472" y1="232" x2="308" y2="232" stroke="#2dd4bf" stroke-width="2.4" marker-end="url(#ah2)"/>
+      <text x="312" y="256" fill="#7ee0d3" font-size="13" font-family="ui-monospace,monospace">206 Partial Content</text>
+
+      <!-- 2. storage -->
+      <rect x="480" y="20" width="300" height="330" rx="16" fill="rgba(255,255,255,.05)" stroke="rgba(255,255,255,.16)"/>
+      <text x="506" y="62" fill="#7186a8" font-size="13" font-weight="700" font-family="inherit" letter-spacing="2">STORAGE</text>
+      <text x="506" y="98" fill="#eaf0fb" font-size="23" font-weight="700" font-family="inherit">对象存储 / 静态服务器</text>
+      <text x="506" y="134" fill="#7186a8" font-size="13" font-family="inherit">S3 · GCS · Azure Blob · CDN · GitHub Pages</text>
+      <text x="506" y="162" fill="#7186a8" font-size="15" font-family="inherit">没有任何 GIS 服务软件在运行</text>
+
+      <rect x="506" y="192" width="248" height="34" rx="7" fill="rgba(79,156,255,.16)" stroke="rgba(79,156,255,.4)"/>
+      <text x="518" y="215" fill="#bcd8ff" font-size="13.5" font-family="ui-monospace,monospace">HEADER / INDEX</text>
+      <rect x="506" y="236" width="38" height="34" rx="6" fill="rgba(255,255,255,.06)" stroke="rgba(255,255,255,.14)"/>
+      <rect x="548" y="236" width="38" height="34" rx="6" fill="url(#g1)" opacity=".9"/>
+      <rect x="590" y="236" width="38" height="34" rx="6" fill="rgba(255,255,255,.06)" stroke="rgba(255,255,255,.14)"/>
+      <rect x="632" y="236" width="38" height="34" rx="6" fill="url(#g1)" opacity=".9"/>
+      <rect x="674" y="236" width="38" height="34" rx="6" fill="rgba(255,255,255,.06)" stroke="rgba(255,255,255,.14)"/>
+      <rect x="716" y="236" width="38" height="34" rx="6" fill="rgba(255,255,255,.06)" stroke="rgba(255,255,255,.14)"/>
+      <text x="506" y="298" fill="#7186a8" font-size="14" font-family="inherit">彩色块 = 本次真正读取的字节区间，</text>
+      <text x="506" y="322" fill="#7186a8" font-size="14" font-family="inherit">其余部分完全没有被传输</text>
+
+      <!-- 3. result -->
+      <rect x="828" y="20" width="300" height="330" rx="16" fill="rgba(45,212,191,.08)" stroke="rgba(45,212,191,.38)"/>
+      <text x="854" y="62" fill="#2dd4bf" font-size="13" font-weight="700" font-family="inherit" letter-spacing="2">RESULT</text>
+      <text x="854" y="98" fill="#eaf0fb" font-size="23" font-weight="700" font-family="inherit">结果</text>
+      <text x="854" y="142" fill="#a8b8d6" font-size="16" font-family="inherit">· 数据集可以是 TB 级</text>
+      <text x="854" y="180" fill="#a8b8d6" font-size="16" font-family="inherit">· 传输量取决于视窗，不是总量</text>
+      <text x="854" y="218" fill="#a8b8d6" font-size="16" font-family="inherit">· 服务端零运维、零授权成本</text>
+      <text x="854" y="256" fill="#a8b8d6" font-size="16" font-family="inherit">· 原始数据留在云端或本机</text>
+      <text x="854" y="294" fill="#a8b8d6" font-size="16" font-family="inherit">· 同一份数据可无限并发访问</text>
+
+      <!-- footline -->
+      <text x="0" y="410" fill="#eaf0fb" font-size="18.5" font-family="inherit">COG · GeoParquet · PMTiles · Zarr · FlatGeobuf 全部遵循同一条原理，区别只在于索引怎么组织、数据块怎么切。</text>
+    </svg>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre · 新一代云原生地理空间信息平台</div><div class="n"></div></div>
+</section>
+
+<!-- 9 ---------------------------------------------------------------- -->
+<section class="slide">
+  <div class="inner">
+    <div class="kicker">另一半故事</div>
+    <h2>浏览器已经变成一个真正的计算平台</h2>
+    <div class="rule"></div>
+    <div class="cols c2 gap14">
+      <div class="card"><h3><span class="dot"></span>WebAssembly（WASM）</h3><p>C / C++ / Rust 编译后在浏览器中以接近原生的速度运行。GDAL 级别的算法、完整的地理处理工具箱，第一次可以整体搬进标签页。</p></div>
+      <div class="card"><h3><span class="dot"></span>DuckDB-WASM + Spatial</h3><p>一个完整的分析型数据库跑在浏览器里，可以直接对远程 GeoParquet 执行空间 SQL，并且自动做列裁剪与行组裁剪。</p></div>
+      <div class="card"><h3><span class="dot t"></span>WebGL / WebGPU</h3><p>渲染压力交给本机显卡。百万级要素的交互式渲染、点云、三维瓦片和栅格重投影都成为常态操作。</p></div>
+      <div class="card"><h3><span class="dot t"></span>本地能力 API</h3><p>文件系统访问，让浏览器可以读本地大文件，甚至直接连接外置 GNSS 接收机。</p></div>
+    </div>
+    <div class="sub mt26">这四项技术凑齐之后，"浏览器里的 GIS" 从演示品变成了生产工具。<em>GeoLibre 就是在这个前提下从零重新设计的。</em></div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre · 新一代云原生地理空间信息平台</div><div class="n"></div></div>
+</section>
+
+<!-- 10 --------------------------------------------------------------- -->
+<section class="slide section">
+  <div class="inner">
+    <div class="big">02</div>
+    <h2>GeoLibre 是什么</h2>
+    <div class="sub">一个免费、开源、轻量级的云原生 GIS 平台。2026年5月27日发布，MIT 协议。当前版本 v2.7.0。</div>
+  </div>
+</section>
+
+<!-- 11 --------------------------------------------------------------- -->
+<section class="slide">
+  <div class="inner">
+    <div class="kicker">定位</div>
+    <h2>四个"不需要"</h2>
+    <div class="rule"></div>
+    <div class="cols c4 gap14">
+      <div class="card accent"><h3>不需要注册</h3><p>打开网页就是可用状态，没有账号、没有配额、没有试用期。</p></div>
+      <div class="card accent"><h3>不需要服务器</h3><p>没有 GeoServer、没有数据库、没有瓦片缓存，也就没有运维。</p></div>
+      <div class="card accent"><h3>不需要上传</h3><p>所有计算在本地完成，数据默认不离开浏览器，隐私与合规天然友好。</p></div>
+      <div class="card accent"><h3>不需要安装</h3><p>浏览器版零安装；需要更强能力时再装桌面端，两者界面完全一致。</p></div>
+    </div>
+    <div class="cols c2 gap14 mt26">
+      <div class="card"><h3><span class="dot t"></span>它擅长什么</h3><p>云原生格式的即时打开、浏览器内的空间分析与 SQL、快速出图与分享、教学与轻量业务、嵌入到自己的系统里。</p></div>
+      <div class="card"><h3><span class="dot y"></span>它不是什么</h3><p>它不是要取代 QGIS 或 ArcGIS。第 15 页我会把两者的关系讲清楚，也会讲清楚差距在哪里。</p></div>
+    </div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre · 新一代云原生地理空间信息平台</div><div class="n"></div></div>
+</section>
+
+<!-- 12 --------------------------------------------------------------- -->
+<section class="slide">
+  <div class="inner">
+    <div class="kicker">技术栈</div>
+    <h2>一份代码库，四层结构</h2>
+    <div class="rule"></div>
+    <div class="cols c2 gap14">
+      <div class="card"><h3><span class="dot"></span>渲染层</h3><p><strong>MapLibre GL JS</strong> 负责矢量与栅格底图渲染，<strong>deck.gl</strong> 负责三维瓦片、点云、Gaussian splat 与大规模栅格叠加，两者共享同一个相机与同一个 WebGL 上下文。</p></div>
+      <div class="card"><h3><span class="dot"></span>数据层</h3><p><strong>DuckDB-WASM Spatial</strong> 读取绝大多数矢量格式并提供空间 SQL；geotiff.js 处理 COG 与多波段影像；专用渲染器处理 Zarr 与 NetCDF 数据立方体。</p></div>
+      <div class="card"><h3><span class="dot t"></span>分析层</h3><p><strong>WebAssembly 地理处理运行时</strong>承载 1000 多个工具；Turf.js 提供轻量矢量算子；浏览器内 Pyodide 可运行 GeoPandas；桌面端可选 Python sidecar 提供 GDAL / rasterio。</p></div>
+      <div class="card"><h3><span class="dot t"></span>外壳层</h3><p><strong>Tauri v2</strong> 把同一个 React + TypeScript 前端打包成 Windows / macOS / Linux 桌面应用与 iOS / Android 原生应用，安装包体积远小于 Electron 方案。</p></div>
+    </div>
+    <div class="mt26">
+      <span class="tag a">React</span><span class="tag a">TypeScript</span><span class="tag a">MapLibre GL JS</span><span class="tag a">deck.gl</span><span class="tag t">DuckDB-WASM</span><span class="tag t">WebAssembly</span><span class="tag t">Tauri v2</span><span class="tag">Zustand</span><span class="tag">Vite</span><span class="tag">FastAPI（可选）</span>
+    </div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre · 新一代云原生地理空间信息平台</div><div class="n"></div></div>
+</section>
+
+<!-- 13 --------------------------------------------------------------- -->
+<section class="slide">
+  <div class="inner">
+    <div class="kicker">交付形态</div>
+    <h2>同一份代码，六种形态</h2>
+    <div class="rule"></div>
+    <div class="cols c3 gap14">
+      <div class="card"><h3><span class="dot"></span>浏览器</h3><p><code>web.geolibre.app</code><br>零安装，可作为 PWA 安装到桌面并离线运行。</p></div>
+      <div class="card"><h3><span class="dot"></span>桌面</h3><p>Windows / macOS / Linux 安装包，另有 Mac App Store、Homebrew、winget、AUR、Flatpak 渠道。</p></div>
+      <div class="card"><h3><span class="dot"></span>移动</h3><p>App Store（iOS）与 Google Play（Android）上的原生应用，由同一代码库经 Tauri v2 构建。</p></div>
+      <div class="card"><h3><span class="dot t"></span>Jupyter</h3><p><code>pip install geolibre</code><br>以 anywidget 形式把整个应用嵌进 Notebook，工程状态双向同步。</p></div>
+      <div class="card"><h3><span class="dot t"></span>R</h3><p><code>geolibre</code> R 包，用于 RStudio、Quarto、R Markdown 与 Shiny。</p></div>
+      <div class="card"><h3><span class="dot t"></span>嵌入 / 自托管</h3><p>iframe 嵌入 + 版本化 postMessage API + 类型化客户端；Docker 私有部署。</p></div>
+    </div>
+    <div class="sub mt26">另有 Chrome 扩展 <strong>Open Data in GeoLibre</strong>：在任意网页上收集可识别的数据链接（GeoJSON，GeoParquet，PMTiles）与地图服务（WMS / WMTS / WFS / OGC API Features / ArcGIS / XYZ），一键在同一张地图上打开。</div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre · 新一代云原生地理空间信息平台</div><div class="n"></div></div>
+</section>
+
+<!-- 14 --------------------------------------------------------------- -->
+<section class="slide">
+  <div class="inner">
+    <div class="kicker">设计原则</div>
+    <h2>四条基本原则</h2>
+    <div class="rule"></div>
+    <ul class="big">
+      <li><strong>本地优先。</strong>计算发生在使用者的设备上，数据默认不出设备。这不是一个可以关掉的隐私选项，而是架构本身的结果。</li>
+      <li><strong>开放格式优先。</strong>工程文件是人可读的 <code>.geolibre.json</code>，可以进版本库、可以被脚本生成、可以被 AI 撰写，不锁定任何人。</li>
+      <li class="t"><strong>可分享性内建。</strong>任何工程都能导出成<em>单个离线 HTML 文件</em>，双击即开，不需要任何服务器；也可以分享成一个链接或嵌进已有系统。</li>
+      <li class="t"><strong>渐进增强。</strong>没有服务器时全部核心功能可用；有 Python sidecar 或自托管服务时，能力再叠加上去，而不是反过来。</li>
+    </ul>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre · 新一代云原生地理空间信息平台</div><div class="n"></div></div>
+</section>
+
+<!-- 15 --------------------------------------------------------------- -->
+<section class="slide">
+  <div class="inner">
+    <div class="kicker">定位澄清</div>
+    <h2>与 QGIS / ArcGIS 的关系：<span class="thin">互补，而非替代</span></h2>
+    <div class="rule"></div>
+    <div class="cols c21 gap14">
+      <div>
+        <div class="card"><h3><span class="dot"></span>专业相机与手机相机</h3><p>QGIS 是专业相机：成熟、强大、可扩展。GeoLibre 更像手机相机：轻便、随手可得、拍完即可分享。手机相机没有取代专业相机，但它让"拍照"的参与人数增加了几个数量级。</p></div>
+        <div class="card mt14"><h3><span class="dot y"></span>坦白说，差距在哪里</h3><p>插件生态的深度、几十年积累的专业工具、投影与拓扑的边缘情况、超大工程的稳定性，QGIS 仍然明显领先。</p></div>
+        <div class="card teal mt14"><h3><span class="dot t"></span>而且它们可以直接对接</h3><p>GeoLibre 可直接导入 QGIS 工程（<code>.qgs</code> / <code>.qgz</code>）与 ArcGIS Pro 工程（<code>.aprx</code> / <code>.mapx</code>），保留图层、分组、样式与视图。</p></div>
+      </div>
+      <div class="fig contain"><img src="images/QGIS-GeoLibre.webp" alt="QGIS 与 GeoLibre 的专业相机与手机相机类比"></div>
+    </div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre · 新一代云原生地理空间信息平台</div><div class="n"></div></div>
+</section>
+
+<!-- 16 --------------------------------------------------------------- -->
+<section class="slide section">
+  <div class="inner">
+    <div class="big">03</div>
+    <h2>核心能力与现场演示</h2>
+    <div class="sub mt20" style="max-width:1000px">
+      <span class="tag a">① 数据加载 · 属性表 · 几何编辑</span>
+      <span class="tag a">② DuckDB + GeoParquet 百 GB 级流式渲染</span>
+      <span class="tag a">③ PMTiles 全球矢量</span>
+      <span class="tag t">④ 三维瓦片与 LiDAR 点云</span>
+      <span class="tag t">⑤ 浏览器内 1000+ 地理处理工具</span>
+      <span class="tag t">⑥ 模型构建器：把工具连成可复用的流程图</span>
+      <span class="tag t">⑦ SamGeo：一句提示词分割影像</span>
+    </div>
+    <div class="sub">以下每一项都会现场运行，完全在浏览器内完成。</div>
+  </div>
+</section>
+
+<!-- 17 --------------------------------------------------------------- -->
+<section class="slide">
+  <div class="inner">
+    <span class="pill demo">演示 01</span>
+    <h2 class="mt14">数据加载、属性表编辑与几何编辑</h2>
+    <div class="rule"></div>
+    <div class="cols c2 gap14">
+      <div class="card"><h3><span class="dot"></span>加载</h3><p>把本地 GeoPackage、Shapefile、GeoParquet、FlatGeobuf、KML/KMZ、GPX、CAD 图纸或 OSM PBF 直接拖到地图上，由 DuckDB-WASM Spatial 在浏览器内解析并统一重投影到 WGS84。</p></div>
+      <div class="card"><h3><span class="dot"></span>属性表</h3><p>排序、筛选、多选高亮、字段计算器、虚拟字段（表达式驱动的计算列）、属性连接、编辑者追踪，以及内置的直方图、散点图、箱线图与字段统计面板。</p></div>
+      <div class="card"><h3><span class="dot t"></span>符号与标注</h3><p>单一、分类、分级、表达式与规则五种渲染器，比例符号、热力图、聚类、图表符号；图例根据符号系统自动生成；样式可导入导出为 SLD、QML 或 Mapbox 样式 JSON。</p></div>
+      <div class="card"><h3><span class="dot t"></span>几何编辑</h3><p>GeoEditor 插件支持拓扑式多边形绘制（与邻居共享边界，不留缝隙或重叠），可以把当前视窗内的要素拉进编辑器，改完写回原始来源，包括 GeoPackage、GeoJSON 与 PostGIS 表。</p></div>
+    </div>
+    <div class="sub mt26">要证明的一件事：<em>加载、查询、编辑、导出的闭环是完整的</em>，这不是一个只能看不能改的浏览器。</div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre · 新一代云原生地理空间信息平台</div><div class="n"></div></div>
+</section>
+
+<!-- 18 --------------------------------------------------------------- -->
+<section class="slide">
+  <div class="inner">
+    <div class="kicker">演示 02 · 原理</div>
+    <h2>为什么 100 GB 的矢量数据可以在浏览器里流畅浏览</h2>
+    <div class="rule"></div>
+    <div class="cols c3 gap14">
+      <div class="card"><h3><span class="num">1</span> 列裁剪</h3><p>GeoParquet 是列式存储。只渲染建筑高度，就只读高度和几何两列，其余几十列的字节根本不会被传输。</p></div>
+      <div class="card"><h3><span class="num">2</span> 行组裁剪</h3><p>每个行组自带空间边界与统计值。DuckDB 先读元数据，把与当前视窗不相交的行组整块跳过。</p></div>
+      <div class="card"><h3><span class="num">3</span> 只取命中区间</h3><p>剩下的行组按字节区间用 Range 请求取回，解压、解码、渲染，全部在浏览器内完成。</p></div>
+    </div>
+    <div class="card accent mt26" style="padding:26px 30px">
+      <p style="font-size:23px;color:#fff;line-height:1.6"><strong>决定性能的不是数据集的总体积，而是当前视窗内的要素数量和你选中的列数。</strong></p>
+      <p class="mt8" style="font-size:18px">这就是"100 GB 级数据集实时流式渲染"能够成立的全部原因，没有任何魔法。真正的上限是浏览器标签页的内存，它约束的是<em>同时驻留内存的要素数量</em>，而不是数据集大小。</p>
+    </div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre · 新一代云原生地理空间信息平台</div><div class="n"></div></div>
+</section>
+
+<!-- 19 --------------------------------------------------------------- -->
+<section class="slide">
+  <div class="inner">
+    <span class="pill demo">演示 02</span>
+    <h2 class="mt14">百 GB 级矢量数据的实时流式渲染</h2>
+    <div class="rule"></div>
+    <div class="cols c2 gap14">
+      <div class="card"><h3><span class="dot"></span>数据来源</h3><p><strong>Overture Maps</strong> 的全球建筑物、道路、地名与行政区划主题，以及 <strong>Source Cooperative</strong> 上的开放 GeoParquet 数据集，均以云原生格式直接托管在对象存储上。</p></div>
+      <div class="card"><h3><span class="dot"></span>现场步骤</h3><p>打开 Overture 插件 → 选择建筑物主题 → 缩放到一座城市 → 要素随视窗流入 → 打开网络面板，看到的是一串 Range 请求，而不是一次整体下载。</p></div>
+      <div class="card"><h3><span class="dot t"></span>接着做分析</h3><p>切到 <strong>SQL 工作区</strong>，对同一个远程 GeoParquet 直接写空间 SQL：按面积筛选、与另一图层做空间连接、聚合统计，结果一键加为新图层。</p></div>
+      <div class="card"><h3><span class="dot t"></span>可选的三个引擎</h3><p>DuckDB Spatial（默认）、<strong>PGlite</strong> 提供的浏览器内 PostGIS、以及 <strong>Apache Sedona</strong>，在同一个面板里切换。还支持 Apache Iceberg 表。</p></div>
+    </div>
+    <div class="sub mt26">一句话收束：<em>数据在云上，索引在文件里，计算在浏览器里，服务器只是一个静态文件服务。</em></div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre · 新一代云原生地理空间信息平台</div><div class="n"></div></div>
+</section>
+
+<!-- 20 --------------------------------------------------------------- -->
+<section class="slide compact">
+  <div class="inner">
+    <span class="pill demo">演示 03</span>
+    <h2 class="mt14">PMTiles：<span class="thin">用一个文件取代一整套瓦片服务</span></h2>
+    <div class="rule"></div>
+    <div class="cols c21 gap14">
+      <div>
+        <div class="card"><h3><span class="dot"></span>它解决了什么</h3><p>传统矢量瓦片要么是几百万个小文件，要么需要一台瓦片服务器。PMTiles 把整个金字塔装进<strong>一个文件</strong>，内置目录索引，客户端用 Range 请求直接取某一块瓦片。</p></div>
+        <div class="card mt14"><h3><span class="dot t"></span>意味着什么</h3><p>一个全球底图可以放在 CDN、对象存储甚至 GitHub Pages 上，零运维、可无限并发、按流量计费而不是按服务器计费。</p></div>
+        <div class="card mt14"><h3><span class="dot t"></span>GeoLibre 的处理</h3><p>矢量瓦片本地没有完整要素，样式面板会<strong>采样当前视窗已加载的要素</strong>填充字段与取值范围，因此分类、分级设色与三维拉伸依然可用。</p></div>
+      </div>
+      <div class="card accent" style="display:flex;flex-direction:column;justify-content:center">
+        <div class="kpi"><div class="v">1 个文件</div><div class="k">取代整个瓦片目录</div></div>
+        <div class="kpi mt14"><div class="v">0 台服务器</div><div class="k">静态托管即可</div></div>
+        <div class="kpi mt14"><div class="v">全球覆盖</div><div class="k">任意缩放级别按需读取</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre · 新一代云原生地理空间信息平台</div><div class="n"></div></div>
+</section>
+
+<!-- 21 --------------------------------------------------------------- -->
+<section class="slide">
+  <div class="inner">
+    <span class="pill demo">演示 04</span>
+    <h2 class="mt14">三维瓦片、点云与真三维场景</h2>
+    <div class="rule" style="margin-bottom:16px"></div>
+    <div class="cols c12 gap14">
+      <div>
+        <ul class="tight">
+          <li><strong>3D Tiles</strong>：倾斜摄影与网格模型流式载入，由 deck.gl 渲染在 MapLibre 地图之上，支持带认证头的私有 tileset。</li>
+          <li><strong>LiDAR 点云</strong>：COPC / LAZ 按高程或分类着色；USGS LiDAR 插件可按感兴趣区裁剪并下载 COPC。</li>
+          <li><strong>ArcGIS I3S</strong> 场景图层（Integrated Mesh 与 3D Object）同样渲染在 deck.gl 上。</li>
+          <li class="t"><strong>Gaussian Splat</strong>、glTF / GLB 模型按坐标放置、地理配准视频叠加。</li>
+          <li class="t"><strong>贴地量测</strong>与三维距离，以及带 16 方位罗盘标签的大圆初始方位角读数。</li>
+        </ul>
+      </div>
+      <div>
+        <div class="fig" style="height:376px"><img src="images/GeoLibre-demo.webp" alt="GeoLibre 中渲染的 3D Tiles 场景"></div>
+        <div class="cap">3D Tiles 倾斜摄影数据渲染在 MapLibre 地图之上</div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre · 新一代云原生地理空间信息平台</div><div class="n"></div></div>
+</section>
+
+<!-- 22 --------------------------------------------------------------- -->
+<section class="slide compact">
+  <div class="inner">
+    <div class="kicker">案例</div>
+    <h2>纽约建筑与地铁：<span class="thin">相机不动，数据在生长</span></h2>
+    <div class="rule" style="margin-bottom:16px"></div>
+    <div class="cols c21 gap14">
+      <div class="fig" style="height:398px"><img src="images/nyc-buildings.webp" alt="曼哈顿建筑按建成年代三维拉伸并着色，叠加地铁线路与自动生成的图例"></div>
+      <div>
+        <div class="card"><h3><span class="dot"></span>这张图里的技术</h3><p>曼哈顿建筑轮廓按建成年代三维拉伸并分类着色，MTA 地铁线路与站点叠加其上，<strong>图例完全由图层符号系统自动生成</strong>。</p></div>
+        <div class="card mt14"><h3><span class="dot t"></span>时间轴动画</h3><p>Time Slider 沿建成年份从 1850 走到 2025，曼哈顿按年代逐层长出来。时间轴不仅驱动 GeoJSON，也驱动矢量瓦片、PMTiles、COG 序列与 Zarr 立方体。</p></div>
+        <div class="card mt14"><h3><span class="dot t"></span>可以直接打开</h3><p>真实的分享链接：<code>share.geolibre.app/giswqs/nyc-buildings-and-subways</code></p></div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre · 新一代云原生地理空间信息平台</div><div class="n"></div></div>
+</section>
+
+<!-- 23 --------------------------------------------------------------- -->
+<section class="slide">
+  <div class="inner">
+    <span class="pill demo">演示 05</span>
+    <h2 class="mt14">1000+ 地理处理工具，<span class="thin">全部跑在浏览器里</span></h2>
+    <div class="rule" style="margin-bottom:16px"></div>
+    <div class="cols c12 gap14">
+      <div>
+        <div class="fig" style="height:300px"><img src="images/whitebox.webp" alt="GeoLibre 的 Whitebox 工具箱在浏览器中通过 WebAssembly 运行"></div>
+        <div class="cap">Whitebox 工具箱通过 WebAssembly 运行时在浏览器内执行，无需 Python 边车</div>
+      </div>
+      <div>
+        <table style="font-size:15.5px">
+          <tr><th>类别</th><th>工具数</th><th>代表工具</th></tr>
+          <tr><td>矢量</td><td>313</td><td>叠加、缓冲、连接、拓扑、综合化</td></tr>
+          <tr><td>栅格</td><td>256</td><td>代数、滤波、重分类、分区与邻域统计</td></tr>
+          <tr><td>遥感</td><td>154</td><td>光谱指数、波段运算、分类、变化检测</td></tr>
+          <tr><td>水文</td><td>100</td><td>洼地填平、流向、汇流累积、流域划分</td></tr>
+          <tr><td>地形</td><td>99</td><td>坡度、坡向、山体阴影、曲率、通视</td></tr>
+          <tr><td>LiDAR</td><td>65</td><td>点云滤波、地面点分类、DEM/DSM 生成</td></tr>
+          <tr><td>格式转换</td><td>49</td><td>转 GeoParquet、PMTiles、COG</td></tr>
+          <tr><td>网络分析</td><td>26</td><td>连通性、成本距离、路径分析</td></tr>
+        </table>
+        <div class="cap">来源：Whitebox Next Gen 套件 + GeoLibre 自有 WASM 工具。网页版、桌面版与安卓版能力一致。</div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre · 新一代云原生地理空间信息平台</div><div class="n"></div></div>
+</section>
+
+<!-- 24 --------------------------------------------------------------- -->
+<section class="slide">
+  <div class="inner">
+    <span class="pill demo">演示 06</span>
+    <h2 class="mt14">模型构建器：<span class="thin">把工具连成一张可复用的流程图</span></h2>
+    <div class="rule" style="margin-bottom:16px"></div>
+    <div class="cols c21 gap14">
+      <div>
+        <div class="fig contain" style="height:372px;background:#0a1120"><img src="images/model-builder.webp" alt="模型构建器画布：从 DEM 出发，洼地填平、D8 流向、汇流累积、河网提取到栅格转矢量连成一张图，结果直接渲染在地图上"></div>
+        <div class="cap">河网提取模型：<code>dem.tif</code> → 洼地填平 → D8 流向 → 汇流累积 → 河网提取 → 栅格转矢量，一次运行得到矢量河网图层</div>
+      </div>
+      <div>
+        <div class="card"><h3><span class="dot"></span>ArcGIS 风格的画布</h3><p>把工具拖成节点，一个工具的输出接到下一个的输入；中间结果可按需保留为输出。</p></div>
+        <div class="card mt14"><h3><span class="dot t"></span>执行前先校验</h3><p>环路、缺失连接、参数类型不匹配都在运行前报出。模型可保存复用、导入导出，也可一键复制为等价 Python 脚本。</p></div>
+        <div class="card mt14"><h3><span class="dot t"></span>AI 可以写模型</h3><p>用自然语言描述流程，AI 生成一张已校验的模型图，人审阅后再执行。全程 WebAssembly，无服务器参与。</p></div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre · 新一代云原生地理空间信息平台</div><div class="n"></div></div>
+</section>
+
+<!-- 25 --------------------------------------------------------------- -->
+<section class="slide compact">
+  <div class="inner">
+    <span class="pill demo">演示 07</span>
+    <h2 class="mt14">SamGeo：<span class="thin">一句提示词，把影像变成矢量</span></h2>
+    <div class="rule" style="margin-bottom:16px"></div>
+    <div class="cols c12 gap14">
+      <div>
+        <div class="card"><h3><span class="dot"></span>图里这一次运行</h3><p>影像 <code>uc_berkeley.tif</code>，模式选文本提示，模型 <code>facebook/sam3.1</code>，提示词只写了一个词 <strong>building</strong>，置信度阈值 0.5，一次返回 <strong>375 个建筑物要素</strong>。</p></div>
+        <div class="card mt14"><h3><span class="dot t"></span>四种提示方式</h3><p>文本提示（"trees"、"buildings"）、在地图上点前景与背景点、拖一个框做"找相似"，以及 SAM 2 的全自动掩膜生成。</p></div>
+        <div class="card mt14"><h3><span class="dot y"></span>说清楚它跑在哪</h3><p>分割结果是带 <code>score</code> 置信度字段的 <strong>GeoJSON 图层</strong>，能进属性表、能继续做叠加分析、能导出。模型推理由单独的 <code>samgeo-api</code> 服务承担（建议 GPU），是本场唯一需要外部服务的演示。</p></div>
+      </div>
+      <div>
+        <div class="fig contain" style="height:356px;background:#0a1120"><img src="images/samgeo-segmentation.webp" alt="SamGeo 分割面板用文本提示 building 在校园航片上分割出建筑物"></div>
+        <div class="cap">加州大学伯克利分校校园航片：一句 <code>building</code> 提示词分割出的 375 个建筑物，蓝色为掩膜</div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre · 新一代云原生地理空间信息平台</div><div class="n"></div></div>
+</section>
+
+<!-- 26 --------------------------------------------------------------- -->
+<section class="slide">
+  <div class="inner">
+    <div class="kicker">分析工作流</div>
+    <h2>SQL 工作区与处理历史</h2>
+    <div class="rule" style="margin-bottom:16px"></div>
+    <div class="cols c21 gap14">
+      <div>
+        <div class="card"><h3><span class="dot"></span>SQL 工作区</h3><p>DuckDB 空间 SQL 直接查询已加载图层、本地文件与远程 URL，带表名列名自动补全、示例查询与查询历史，结果可加为图层或导出。</p></div>
+        <div class="card mt14"><h3><span class="dot t"></span>数据库引擎</h3><p>除 DuckDB Spatial 外，浏览器内还可选 PGlite（PostGIS）与 Apache Sedona 引擎；支持 Apache Iceberg 表，CRS 从 schema 读取，行数按清单元数据先行报告。</p></div>
+        <div class="card mt14"><h3><span class="dot t"></span>处理历史</h3><p>每一次工具运行都被记录，可一键重跑，也可以直接复制等价的 Python 代码，交给 Notebook 面板或 JupyterLite 批量执行。</p></div>
+      </div>
+      <div>
+        <div class="fig contain" style="height:330px;background:#0a1120"><img src="images/geolibre-sql-workspace.webp" alt="SQL 工作区停靠在地图旁运行空间查询"></div>
+        <div class="cap">SQL 工作区停靠在地图旁边，查询结果直接成为图层</div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre · 新一代云原生地理空间信息平台</div><div class="n"></div></div>
+</section>
+
+<!-- 27 --------------------------------------------------------------- -->
+<section class="slide">
+  <div class="inner">
+    <div class="kicker">生态</div>
+    <h2>插件系统：<span class="thin">能力可以被第三方扩展</span></h2>
+    <div class="rule"></div>
+    <div class="cols c3 gap14">
+      <div class="card"><h3><span class="dot"></span>地图能力插件</h3><p>卷帘对比、时间轴、H3 与 DGGS 网格、高程剖面、路径规划、街景与 Mapillary、大气与深空效果、飞行模拟器、地图录制。</p></div>
+      <div class="card"><h3><span class="dot"></span>数据目录插件</h3><p>STAC 目录与 API、NASA Earthdata GIS、Planetary Computer、Overture Maps、Source Cooperative、Hugging Face、Natural Earth、GeoLens。</p></div>
+      <div class="card"><h3><span class="dot t"></span>分析与编辑插件</h3><p>GeoEditor 拓扑编辑与建筑体量、USGS LiDAR 裁剪、SamGeo 影像分割、GeoAgent。</p></div>
+    </div>
+    <div class="cols c2 gap14 mt20">
+      <div class="card"><h3><span class="dot t"></span>插件 API 能做什么</h3><p>注册右侧面板、工具栏菜单与浮动面板；直接使用宿主的 deck.gl 实例与 Zarr 渲染器；只读查询宿主已加载图层的要素，而不必重新拉取和解析一遍数据源。</p></div>
+      <div class="card"><h3><span class="dot"></span>分发方式</h3><p><code>plugin.json</code> 清单、zip 安装（桌面与网页均可）、构建内置的 drop-in 目录，以及 <code>plugins.geolibre.app</code> 上的插件注册表，支持版本检查与一键更新。</p></div>
+    </div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre · 新一代云原生地理空间信息平台</div><div class="n"></div></div>
+</section>
+
+<!-- 28 --------------------------------------------------------------- -->
+<section class="slide compact">
+  <div class="inner">
+    <div class="kicker">分享与嵌入</div>
+    <h2>做完之后，怎么交出去</h2>
+    <div class="rule" style="margin-bottom:16px"></div>
+    <div class="cols c12 gap14">
+      <div>
+        <div class="card"><h3><span class="dot"></span>导出为单个 HTML</h3><p>整个工程导出成<strong>一个离线可用的 HTML 文件</strong>，双击即开，不需要服务器与网络。发给领导、评审或学生，就是一个附件。</p></div>
+        <div class="card mt14"><h3><span class="dot"></span>分享链接与可达性检查</h3><p>上传前逐个探测工程引用的数据源，把接收方打不开的列出来并说明原因（需要凭据、缺少跨域头、链接失效、指向本地路径）。它只提示，不阻止。</p></div>
+        <div class="card mt14"><h3><span class="dot t"></span>嵌入你自己的系统</h3><p><code>maponly</code> 纯地图、<code>layout=viewer</code> 只读、<code>?data=</code> 与 <code>?style=</code> 深链、<code>?tool=</code> 直达工具，再加上版本化 postMessage API。</p></div>
+      </div>
+      <div>
+        <div class="fig" style="height:394px"><img src="images/geolibre-embed-maponly.webp" alt="maponly 模式下的纯地图嵌入效果"></div>
+        <div class="cap">maponly 嵌入模式：没有工具栏、面板与状态栏的纯地图</div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre · 新一代云原生地理空间信息平台</div><div class="n"></div></div>
+</section>
+
+<!-- 29 --------------------------------------------------------------- -->
+<section class="slide">
+  <div class="inner">
+    <div class="kicker">延伸</div>
+    <h2>不止于地球</h2>
+    <div class="rule" style="margin-bottom:16px"></div>
+    <div class="cols c4 gap12">
+      <div><div class="fig" style="height:186px"><img src="images/earth.webp" alt="地球"></div><div class="cap" style="text-align:center">地球</div></div>
+      <div><div class="fig" style="height:186px"><img src="images/moon.webp" alt="月球"></div><div class="cap" style="text-align:center">月球 · LOLA</div></div>
+      <div><div class="fig" style="height:186px"><img src="images/mars.webp" alt="火星"></div><div class="cap" style="text-align:center">火星 · MOLA</div></div>
+      <div><div class="fig" style="height:186px"><img src="images/pluto.webp" alt="冥王星"></div><div class="cap" style="text-align:center">冥王星 · New Horizons</div></div>
+    </div>
+    <div class="cols c2 gap14 mt20">
+      <div class="card"><h3><span class="dot"></span>行星底图</h3><p>覆盖月球、火星、水星、金星、木卫二 / 三 / 四、土卫六、冥王星与卡戎，数据来自 OpenPlanetaryMap 与 USGS Astrogeology。</p></div>
+      <div class="card teal"><h3><span class="dot t"></span>背后的工程含义</h3><p>每个工程携带自己的椭球体参数，因此距离、面积与比例尺量测与所测天体一致。底图、投影和量测都是可配置的，而不是把地球写死在代码里。</p></div>
+    </div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre · 新一代云原生地理空间信息平台</div><div class="n"></div></div>
+</section>
+
+<!-- 30 --------------------------------------------------------------- -->
+<section class="slide">
+  <div class="inner">
+    <div class="kicker">落地</div>
+    <h2>跨平台部署与私有化</h2>
+    <div class="rule"></div>
+    <div class="cols c2 gap14">
+      <div class="card"><h3><span class="dot"></span>内网 Docker 部署</h3><p>一条命令起一个浏览器版容器，可选 HTTP Basic Auth。<code>GEOLIBRE_SHARE_URL</code> 与 <code>GEOLIBRE_COLLAB_URL</code> 在容器启动时把分享与协作指向自建服务器，设为 <code>off</code> 则彻底移除分享入口。</p></div>
+      <div class="card"><h3><span class="dot"></span>完全隔离的构建</h3><p><code>GEOLIBRE_NO_EXTERNAL_CDN=1</code> 会剥离全部外部 CDN 依赖，把少数确实需要远程主机的功能<strong>提前明示</strong>，而不是运行到最后才失败。</p></div>
+      <div class="card teal"><h3><span class="dot t"></span>界面裁剪（UI Profiles）</h3><p>为特定部署裁剪可见的菜单、面板与数据源，把一个通用 GIS 收敛成面向某项业务的精简界面，不需要改代码或维护分支。</p></div>
+      <div class="card teal"><h3><span class="dot t"></span>离线与国际化</h3><p>可安装为 PWA 并离线运行，"下载离线区域"预缓存当前视窗底图瓦片；18 套完整翻译目录，含简体中文，阿拉伯语与波斯语为完整镜像的从右到左界面。</p></div>
+    </div>
+    <div class="sub mt26">自托管的分享、账号与实时协作也有文档化的 v1 HTTP 契约与 FastAPI 参考实现，机构可以把全部数据与项目留在自己的基础设施上。</div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre · 新一代云原生地理空间信息平台</div><div class="n"></div></div>
+</section>
+
+<!-- 31 --------------------------------------------------------------- -->
+<section class="slide section">
+  <div class="inner">
+    <div class="big">04</div>
+    <h2>开源项目的发展经验</h2>
+    <div class="sub">五个项目，学到的几件事。</div>
+  </div>
+</section>
+
+<!-- 32 --------------------------------------------------------------- -->
+<section class="slide">
+  <div class="inner">
+    <div class="kicker">项目谱系</div>
+    <h2>每一步学到的一件事</h2>
+    <div class="rule"></div>
+    <div class="cols c2 gap14">
+      <div class="card"><h3><img class="mini" src="images/geemap.webp" alt="">geemap</h3><p>把 Earth Engine 接进 Python 与 Jupyter。<br><em>降低一个既有强大系统的使用门槛，本身就是巨大的价值。</em></p></div>
+      <div class="card"><h3><img class="mini" src="images/leafmap.webp" alt="">leafmap</h3><p>不依赖任何商业云平台的交互式制图库。<br><em>不要把用户锁在单一后端上。</em></p></div>
+      <div class="card"><h3><img class="mini" src="images/samgeo.webp" alt="">segment-geospatial</h3><p>把 SAM 用到遥感影像分割上。<br><em>通用模型进入垂直领域时，接口比模型更决定采纳率。</em></p></div>
+      <div class="card accent"><h3><img class="mini" src="images/geolibre.webp" alt="">GeoLibre</h3><p>把以上所有经验做成一个可以直接打开的应用。<br><em>当"安装"这一步被去掉，使用者的数量级会变。</em></p></div>
+    </div>
+    <div class="sub mt26">这条路径其实一直在做同一件事：<strong>把技术与使用者之间的步骤，一步一步删掉。</strong></div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre · 新一代云原生地理空间信息平台</div><div class="n"></div></div>
+</section>
+
+<!-- 33 --------------------------------------------------------------- -->
+<section class="slide">
+  <div class="inner">
+    <div class="kicker">经验</div>
+    <h2>开源如何真正推动普及</h2>
+    <div class="rule"></div>
+    <ul class="big">
+      <li><strong>免费只是必要条件，不是充分条件。</strong>真正起作用的是文档、示例数据、视频教程、可复现的 Notebook，以及对 issue 的快速响应。</li>
+      <li><strong>分发渠道和代码同等重要。</strong>一个项目同时出现在 PyPI、conda-forge、CRAN、App Store、Google Play、Microsoft Store、Homebrew、winget、AUR 上，和只有一个 GitHub 仓库，是完全不同的两件事。</li>
+      <li class="t"><strong>可引用性决定学术采纳。</strong>每个版本在 Zenodo 上都有 DOI，使用者可以在论文里正式引用，这会形成正反馈。</li>
+      <li class="t"><strong>坦诚地讲一句：</strong>GeoLibre 的开发速度在很大程度上得益于 AI 编程助手。这本身就是"开源 + AI"的一个真实样本。</li>
+    </ul>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre · 新一代云原生地理空间信息平台</div><div class="n"></div></div>
+</section>
+
+<!-- 34 --------------------------------------------------------------- -->
+<section class="slide">
+  <div class="inner">
+    <div class="kicker">邀请</div>
+    <h2>欢迎参与</h2>
+    <div class="rule"></div>
+    <div class="cols c3 gap14">
+      <div class="card"><h3><span class="dot"></span>使用与反馈</h3><p>提 issue、报告 bug、提功能需求。真实使用场景的描述，往往比一个补丁更有价值。</p></div>
+      <div class="card"><h3><span class="dot"></span>中文术语审校</h3><p>界面已有完整简体中文翻译，术语的准确性仍需要国内同行把关，这是最容易上手也最见效的贡献。</p></div>
+      <div class="card"><h3><span class="dot t"></span>写插件</h3><p>按 <code>plugin.json</code> 契约写一个插件，完全不需要改主仓库代码，也不需要等待合并。</p></div>
+      <div class="card teal"><h3><span class="dot t"></span>用于教学</h3><p>零安装意味着机房、临时电脑和学生自带笔记本都不再是障碍，一个链接就能开始上课。</p></div>
+      <div class="card teal"><h3><span class="dot t"></span>用于业务试点</h3><p>内网 Docker 部署 + UI Profiles 裁剪界面，可以低成本地在一个具体业务里先跑起来。</p></div>
+      <div class="card"><h3><span class="dot"></span>赞助</h3><p>GitHub Sponsors。项目是 MIT 协议，赞助支持的是持续开发、托管与跨平台分发。</p></div>
+    </div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre · 新一代云原生地理空间信息平台</div><div class="n"></div></div>
+</section>
+
+<!-- 35 --------------------------------------------------------------- -->
+<section class="slide">
+  <div class="inner">
+    <div class="kicker">总结</div>
+    <h2>三句话</h2>
+    <div class="rule"></div>
+    <div class="cols c3 gap14">
+      <div class="card accent" style="padding:28px"><div class="num" style="font-size:40px">01</div><p class="mt14" style="font-size:19px;color:var(--fg);line-height:1.7">云原生格式让"打开一份 100 GB 的数据"变成一件几秒钟的事，代价只是几十个 HTTP Range 请求。</p></div>
+      <div class="card accent" style="padding:28px"><div class="num" style="font-size:40px">02</div><p class="mt14" style="font-size:19px;color:var(--fg);line-height:1.7">WebAssembly 与 DuckDB 让完整的空间分析能力进入浏览器，数据无需离开本机，隐私与效率同时成立。</p></div>
+      <div class="card accent" style="padding:28px"><div class="num" style="font-size:40px">03</div><p class="mt14" style="font-size:19px;color:var(--fg);line-height:1.7">GeoLibre 把这两件事做成了一个免费开源、跨平台、零安装、可分享的应用，今天就可以打开使用。</p></div>
+    </div>
+    <div class="cols c2 gap14 mt26">
+      <div class="card teal"><h3><span class="dot t"></span>对高校与科研</h3><p>零安装的教学环境、可引用的开源工具、可复现的 Notebook 工作流。</p></div>
+      <div class="card teal"><h3><span class="dot t"></span>对政府与企业</h3><p>内网可部署、数据不出本机、界面可裁剪、可嵌入既有系统，MIT 协议无商用限制。</p></div>
+    </div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre · 新一代云原生地理空间信息平台</div><div class="n"></div></div>
+</section>
+
+<!-- 36 --------------------------------------------------------------- -->
+<section class="slide end">
+  <div class="inner">
+    <img class="brandmark sm" src="images/geolibre.webp" alt="GeoLibre">
+    <div class="kicker">谢谢</div>
+    <h2 style="font-size:52px">欢迎提问</h2>
+    <div class="rule" style="margin:22px 0 28px"></div>
+    <div class="cols c2 gap14">
+      <div class="card"><h3><span class="dot"></span>马上试用</h3>
+        <p style="font-size:17.5px;line-height:2">
+          网页版　<code>web.geolibre.app</code><br>
+          文档　　<code>geolibre.app</code><br>
+          源码　　<code>github.com/opengeos/GeoLibre</code><br>
+          示例　　<code>share.geolibre.app</code>
+        </p>
+      </div>
+      <div class="card"><h3><span class="dot t"></span>安装与引用</h3>
+        <p style="font-size:17.5px;line-height:2">
+          Python　<code>pip install geolibre</code><br>
+          插件　　<code>plugins.geolibre.app</code><br>
+          协议　　MIT<br>
+          引用　　<code>doi.org/10.5281/zenodo.20785400</code>
+        </p>
+      </div>
+    </div>
+    <div class="sub mt26" style="color:var(--fg3);font-size:17px">Wu, Q. (2026). GeoLibre: A lightweight, cloud-native GIS platform for visualizing, exploring, and analyzing geospatial data. Zenodo. https://doi.org/10.5281/zenodo.20785400</div>
+  </div>
+</section>
+
+</div></div>
+
+<div id="bar"></div>
+<div id="hud">
+  <button class="btn" id="btnToc" title="目录 (L)">目录</button>
+  <button class="btn" id="btnFs" title="全屏 (F)">全屏</button>
+</div>
+<div id="toc"><h4>目录 · 点击跳转 · ESC 关闭</h4><ol id="tocList"></ol></div>
+<div id="help">← → 翻页 · F 全屏 · L 目录 · Ctrl+P 导出 PDF</div>
+
+<script>
+(function(){
+  var slides = [].slice.call(document.querySelectorAll('.slide'));
+  var deck = document.getElementById('deck');
+  var bar = document.getElementById('bar');
+  var toc = document.getElementById('toc');
+  var tocList = document.getElementById('tocList');
+  var i = 0;
+
+  function titleOf(s){
+    var h = s.querySelector('h1,h2');
+    var t = h ? h.textContent.replace(/\s+/g,' ').trim() : '（章节）';
+    return t.length > 34 ? t.slice(0,34) + '…' : t;
+  }
+
+  slides.forEach(function(s, n){
+    var f = s.querySelector('.foot .n');
+    if (f) f.textContent = (n+1) + ' / ' + slides.length;
+    var li = document.createElement('li');
+    li.innerHTML = '<span>' + (n+1) + '</span>' + titleOf(s);
+    li.addEventListener('click', function(){ go(n); toc.classList.remove('on'); });
+    tocList.appendChild(li);
+  });
+
+  function fit(){
+    var s = Math.min(window.innerWidth / 1280, window.innerHeight / 720);
+    deck.style.transform = 'scale(' + s + ')';
+  }
+
+  function go(n){
+    i = Math.max(0, Math.min(slides.length - 1, n));
+    slides.forEach(function(s, k){ s.classList.toggle('active', k === i); });
+    bar.style.width = ((i + 1) / slides.length * 100) + '%';
+    [].forEach.call(tocList.children, function(li, k){ li.classList.toggle('cur', k === i); });
+    try { location.hash = '#' + (i + 1); } catch (e) {}
+  }
+
+  document.addEventListener('keydown', function(e){
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    var k = e.key;
+    if (k === 'ArrowRight' || k === 'ArrowDown' || k === 'PageDown' || k === ' ') { e.preventDefault(); go(i+1); }
+    else if (k === 'ArrowLeft' || k === 'ArrowUp' || k === 'PageUp') { e.preventDefault(); go(i-1); }
+    else if (k === 'Home') { go(0); }
+    else if (k === 'End') { go(slides.length-1); }
+    else if (k === 'f' || k === 'F') { toggleFs(); }
+    else if (k === 'l' || k === 'L') { toc.classList.toggle('on'); }
+    else if (k === 'Escape') { toc.classList.remove('on'); }
+  });
+
+  function toggleFs(){
+    if (document.fullscreenElement) document.exitFullscreen();
+    else document.documentElement.requestFullscreen && document.documentElement.requestFullscreen();
+  }
+
+  document.getElementById('btnFs').addEventListener('click', toggleFs);
+  document.getElementById('btnToc').addEventListener('click', function(){ toc.classList.toggle('on'); });
+
+  window.addEventListener('resize', fit);
+  fit();
+  var start = parseInt((location.hash || '').replace('#',''), 10);
+  go(isNaN(start) ? 0 : start - 1);
+})();
+</script>
+</body>
+</html>
