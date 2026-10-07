@@ -1,0 +1,737 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LiDAR and Terrain Analysis in the Browser with GeoLibre</title>
+<style>
+:root{
+  --bg:#070c17;
+  --bg2:#0d1626;
+  --panel:rgba(255,255,255,.045);
+  --line:rgba(255,255,255,.10);
+  --line2:rgba(255,255,255,.18);
+  --fg:#eaf0fb;
+  --fg2:#a8b8d6;
+  --fg3:#7186a8;
+  --a:#4f9cff;
+  --a2:#2dd4bf;
+  --a3:#f0b429;
+  --w:1280px;
+  --h:720px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#04070e;overflow:hidden;overscroll-behavior:none;-webkit-text-size-adjust:100%}
+body{
+  font-family:"Inter","Helvetica Neue",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,system-ui,sans-serif;
+  color:var(--fg);
+  -webkit-font-smoothing:antialiased;
+  font-feature-settings:"tnum" 1;
+}
+#stage{position:fixed;inset:0;overflow:hidden}
+#deck{position:absolute;left:50%;top:50%;width:var(--w);height:var(--h);transform-origin:center center;-webkit-user-select:none;user-select:none}
+
+.slide{
+  position:absolute;inset:0;width:var(--w);height:var(--h);
+  background:
+    radial-gradient(1100px 620px at 82% -12%, rgba(79,156,255,.16), transparent 62%),
+    radial-gradient(900px 560px at -8% 108%, rgba(45,212,191,.10), transparent 60%),
+    linear-gradient(160deg,var(--bg2) 0%, var(--bg) 62%);
+  display:none;overflow:hidden;
+}
+.slide.active{display:block}
+.inner{position:absolute;inset:0;padding:56px 76px 74px}
+
+/* ---------- typography ---------- */
+.kicker{font-size:15px;letter-spacing:.20em;color:var(--a);font-weight:700;margin-bottom:14px;text-transform:uppercase}
+h2{font-size:40px;line-height:1.2;font-weight:800;letter-spacing:-.01em}
+h2 .thin{font-weight:400;color:var(--fg2)}
+.sub{margin-top:12px;font-size:20px;line-height:1.65;color:var(--fg2);max-width:1010px}
+.rule{height:3px;width:66px;background:linear-gradient(90deg,var(--a),var(--a2));border-radius:3px;margin:20px 0 26px}
+p{line-height:1.7}
+strong{color:#fff;font-weight:700}
+em{font-style:normal;color:var(--a2);font-weight:600}
+code{font-family:ui-monospace,"JetBrains Mono","SF Mono",Menlo,Consolas,monospace;font-size:.88em;background:rgba(79,156,255,.14);color:#bcd8ff;padding:2px 7px;border-radius:6px;white-space:nowrap}
+
+/* ---------- layout helpers ---------- */
+.cols{display:grid;gap:20px}
+.c2{grid-template-columns:1fr 1fr}
+.c3{grid-template-columns:repeat(3,1fr)}
+.c4{grid-template-columns:repeat(4,1fr)}
+.c5{grid-template-columns:repeat(5,1fr)}
+.c21{grid-template-columns:1.15fr .85fr}
+.c12{grid-template-columns:.85fr 1.15fr}
+.gap12{gap:12px}
+.gap14{gap:14px}
+.mt8{margin-top:8px}.mt14{margin-top:14px}.mt20{margin-top:20px}.mt26{margin-top:26px}
+
+.card{
+  background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 22px;
+}
+.card h3{font-size:20px;font-weight:700;margin-bottom:9px;display:flex;align-items:center;gap:9px}
+.card p{font-size:16.5px;color:var(--fg2);line-height:1.62}
+.card.accent{border-color:rgba(79,156,255,.42);background:rgba(79,156,255,.09)}
+.card.teal{border-color:rgba(45,212,191,.36);background:rgba(45,212,191,.08)}
+.logocard{text-align:center;padding:22px 16px}
+.logocard img{width:78px;height:78px;object-fit:contain;display:block;margin:0 auto 14px}
+.logocard h4{font-size:18.5px;font-weight:700;color:#fff;margin-bottom:8px;letter-spacing:.01em}
+.metarow{display:flex;justify-content:center;align-items:center;gap:7px;margin-bottom:11px;flex-wrap:wrap}
+.stars{display:inline-flex;align-items:center;gap:5px;font-size:13.5px;font-weight:700;color:#f3c765;background:rgba(240,180,41,.13);border:1px solid rgba(240,180,41,.34);padding:3px 10px;border-radius:999px;font-variant-numeric:tabular-nums}
+.year{display:inline-flex;align-items:center;font-size:13.5px;font-weight:700;color:#a9cfff;background:rgba(79,156,255,.13);border:1px solid rgba(79,156,255,.36);padding:3px 10px;border-radius:999px;font-variant-numeric:tabular-nums}
+.stars svg{width:12px;height:12px;fill:#f0b429}
+.logocard p{font-size:15.5px;line-height:1.55}
+.card h3 img.mini{width:44px;height:44px;object-fit:contain;flex:0 0 auto;margin:-4px 0}
+.brandmark{width:92px;height:92px;object-fit:contain;display:block;margin-bottom:22px}
+.brandmark.sm{width:64px;height:64px;margin-bottom:16px}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--a);flex:0 0 auto}
+.dot.t{background:var(--a2)}.dot.y{background:var(--a3)}
+
+ul{list-style:none}
+li{position:relative;padding-left:20px;margin-bottom:11px;font-size:18.5px;line-height:1.62;color:var(--fg2)}
+li::before{content:"";position:absolute;left:2px;top:.72em;width:6px;height:6px;border-radius:50%;background:var(--a);opacity:.85}
+li.t::before{background:var(--a2)}
+ul.tight li{margin-bottom:7px;font-size:17px}
+ul.big li{font-size:21px;margin-bottom:16px}
+
+table{width:100%;border-collapse:collapse;font-size:16px}
+th{text-align:left;font-weight:700;color:var(--a);padding:10px 12px;border-bottom:1.5px solid rgba(79,156,255,.35);font-size:15px;letter-spacing:.02em}
+td{padding:9px 12px;border-bottom:1px solid var(--line);color:var(--fg2);vertical-align:top;line-height:1.5}
+td:first-child{color:var(--fg);font-weight:600}
+tr:last-child td{border-bottom:none}
+
+.num{font-size:30px;font-weight:800;color:var(--a);line-height:1}
+.kpi{text-align:center;padding:16px 10px}
+.kpi .v{font-size:34px;font-weight:800;background:linear-gradient(180deg,#fff,#9dc6ff);-webkit-background-clip:text;background-clip:text;color:transparent;line-height:1.1}
+.kpi .k{font-size:14.5px;color:var(--fg3);margin-top:6px}
+
+.tag{display:inline-block;font-size:13.5px;padding:5px 12px;border-radius:999px;border:1px solid var(--line2);color:var(--fg2);margin:0 7px 8px 0}
+.tag.a{border-color:rgba(79,156,255,.5);color:#a9cfff;background:rgba(79,156,255,.1)}
+.tag.t{border-color:rgba(45,212,191,.45);color:#8ee9dc;background:rgba(45,212,191,.09)}
+
+.fig{border-radius:12px;overflow:hidden;border:1px solid var(--line);background:#0a1120;display:flex;align-items:center;justify-content:center}
+.fig img{display:block;width:100%;height:100%;object-fit:cover}
+.fig.contain img{object-fit:contain}
+.fig.video{width:752px;height:423px;margin:0 auto}
+.fig.video video{display:block;width:100%;height:100%;object-fit:contain;background:#000}
+.cap{font-size:14px;color:var(--fg3);margin-top:9px;line-height:1.5}
+
+.compact .card{padding:15px 18px}
+.compact .card h3{margin-bottom:7px}
+.compact .card p{font-size:16px;line-height:1.58}
+.xcompact .card{padding:14px 17px}
+.xcompact .card h3{margin-bottom:6px;font-size:19px}
+.xcompact .card p{font-size:15.5px;line-height:1.52}
+.xcompact .cols{gap:12px}
+.xcompact .mt14{margin-top:11px}
+.xcompact li{margin-bottom:8px}
+.pill{display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:700;color:#04101f;background:linear-gradient(90deg,var(--a2),#7ef0dd);padding:6px 14px;border-radius:999px;letter-spacing:.03em}
+.pill.demo{background:linear-gradient(90deg,#ffb347,var(--a3));}
+
+/* ---------- special slides ---------- */
+.cover .inner{display:flex;flex-direction:row;align-items:center;gap:58px;padding:0 92px}
+.cover .cmain{flex:1;min-width:0}
+.cover .cqr{flex:0 0 232px;text-align:center}
+.cover .cqr .qbox{background:#fff;border-radius:16px;padding:14px;box-shadow:0 10px 40px rgba(0,0,0,.45);width:-moz-fit-content;width:fit-content;margin:0 auto;display:flex;align-items:center;justify-content:center}
+.cover .cqr img{display:block;width:204px;height:204px;image-rendering:pixelated}
+.cover .cqr .qlab{margin-top:14px;font-size:15px;color:var(--fg2);line-height:1.7}
+.cover .cqr .qlab code{font-size:12.5px;display:inline-block;margin-top:5px}
+.cover h1{font-size:52px;font-weight:800;line-height:1.18;letter-spacing:-.02em}
+.cover h1 .g{background:linear-gradient(90deg,#7ab8ff,var(--a2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.cover .en{margin-top:16px;font-size:20px;color:var(--fg3);letter-spacing:.04em}
+.cover .meta{margin-top:44px;font-size:19px;color:var(--fg2);line-height:2}
+.cover .meta b{color:#fff;font-weight:700}
+
+.section .inner{display:flex;flex-direction:column;justify-content:center;padding:0 92px}
+.section .big{font-size:120px;font-weight:800;color:rgba(79,156,255,.20);line-height:.9;letter-spacing:-.04em}
+.section h2{font-size:52px;margin-top:8px}
+.section .sub{font-size:21px;margin-top:18px}
+
+.end .inner{display:flex;flex-direction:column;justify-content:center;padding:0 92px}
+
+/* ---------- chrome ---------- */
+.foot{position:absolute;left:76px;right:76px;bottom:26px;display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--fg3);letter-spacing:.03em}
+.foot .b{display:flex;align-items:center;gap:9px}
+.foot .logo{width:19px;height:19px;object-fit:contain;opacity:.9}
+.cover .foot,.section .foot{display:none}
+#bar{position:fixed;left:0;bottom:0;height:3px;background:linear-gradient(90deg,var(--a),var(--a2));transition:width .25s ease;z-index:50}
+#hud{position:fixed;top:14px;right:16px;display:flex;gap:8px;align-items:center;z-index:60;font-size:12.5px;color:var(--fg3)}
+#hud .btn{background:rgba(255,255,255,.06);border:1px solid var(--line);color:var(--fg2);padding:5px 10px;border-radius:8px;cursor:pointer;font:inherit}
+#hud .btn:hover{background:rgba(79,156,255,.18);color:#fff}
+
+#toc{position:fixed;inset:0;background:rgba(4,7,14,.94);z-index:80;display:none;padding:38px 46px;overflow:auto}
+#toc.on{display:block}
+#toc h4{font-size:15px;letter-spacing:.2em;color:var(--a);margin-bottom:18px}
+#toc ol{list-style:none;columns:3;column-gap:34px}
+#toc li{padding-left:0;margin-bottom:9px;font-size:15px;cursor:pointer;color:var(--fg2);break-inside:avoid}
+#toc li::before{display:none}
+#toc li:hover{color:var(--a)}
+#toc li span{display:inline-block;width:30px;color:var(--fg3);font-variant-numeric:tabular-nums}
+#toc li.cur{color:#fff;font-weight:700}
+#toc li button{background:none;border:0;padding:0;margin:0;font:inherit;color:inherit;cursor:pointer;text-align:left}
+#toc li button:focus-visible{outline:2px solid var(--a);outline-offset:3px;border-radius:3px}
+
+
+#help{position:fixed;left:16px;bottom:14px;z-index:60;font-size:12px;color:rgba(255,255,255,.22)}
+
+#nav{position:fixed;right:14px;bottom:14px;display:none;gap:10px;z-index:60}
+#nav button{width:48px;height:48px;border-radius:14px;border:1px solid var(--line2);background:rgba(12,20,36,.86);color:var(--fg);font-size:20px;line-height:1;cursor:pointer;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+#nav button:active{background:rgba(79,156,255,.3)}
+
+#rotate{position:fixed;left:50%;bottom:82px;transform:translateX(-50%);z-index:65;display:none;
+  background:rgba(12,20,36,.92);border:1px solid var(--line2);color:var(--fg2);font-size:14px;
+  padding:10px 18px;border-radius:999px;white-space:nowrap;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+
+@media (pointer:coarse),(max-width:900px){
+  #nav{display:flex}
+  #help{display:none}
+  #hud .btn{padding:9px 14px;font-size:14px}
+}
+@media (max-width:900px) and (orientation:portrait){
+  #rotate.show{display:block}
+}
+@media (max-width:900px){
+  #toc{padding:24px 20px}
+  #toc ol{columns:1}
+  #toc li{font-size:16px;padding:6px 0}
+}
+
+@media print{
+  html,body{overflow:visible;background:#fff}
+  #stage{position:static;display:block;overflow:visible}
+  #deck{position:static!important;left:auto;top:auto;transform:none!important;width:var(--w);height:auto}
+  .slide{display:block!important;position:relative;page-break-after:always;break-after:page;width:var(--w);height:var(--h)}
+  #hud,#bar,#toc,#help,#nav,#rotate{display:none!important}
+  @page{size:1280px 720px;margin:0}
+}
+</style>
+</head>
+<body>
+
+<div id="stage"><div id="deck">
+
+<section class="slide cover">
+  <div class="inner">
+    <div class="cmain">
+      <img class="brandmark" src="images/geolibre.webp" alt="GeoLibre">
+      <div class="kicker">LiDAR &middot; Terrain &middot; WebAssembly</div>
+      <h1>LiDAR and Terrain Analysis<br>in the Browser with <span class="g">GeoLibre</span></h1>
+      <div class="en">Free, open source, and nothing to install: your data never leaves your machine</div>
+      <div class="meta">
+        <b>Qiusheng Wu</b><br>
+        University of Tennessee, Knoxville &middot; Open Geospatial Solutions<br>
+        <span style="color:var(--fg3)">geolibre.app &nbsp;&middot;&nbsp; github.com/opengeos/GeoLibre &nbsp;&middot;&nbsp; MIT License</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="slide ">
+  <div class="inner">
+    <div class="kicker">Agenda</div>
+    <h2>Three parts, and most of the time is a live demo</h2>
+    <div class="rule"></div>
+    <div class="cols c3 gap14">
+      <div class="card"><h3><span class="num">01</span></h3><p style="font-size:19px;color:var(--fg)"><strong>Why LiDAR in the browser</strong></p><p class="mt8">What is hard today, and what changed</p></div>
+      <div class="card"><h3><span class="num">02</span></h3><p style="font-size:19px;color:var(--fg)"><strong>GeoLibre and Whitebox</strong></p><p class="mt8">How geoprocessing runs locally on WebAssembly</p></div>
+      <div class="card accent"><h3><span class="num" style="color:var(--a3)">03</span></h3><p style="font-size:19px;color:var(--fg)"><strong>Live demo</strong></p><p class="mt8">Find LiDAR, build a DEM, analyze terrain, share it</p></div>
+    </div>
+    <div class="sub mt26">Everything in part three runs in a browser tab. No installer, no account, no upload.</div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre &middot; LiDAR and terrain analysis in the browser</div><div class="n"></div></div>
+</section>
+
+<section class="slide section">
+  <div class="inner">
+    <div class="big">01</div>
+    <h2>Why LiDAR in the browser</h2>
+    <div class="sub">Terrain analysis is valuable and widely needed. Getting to the first result is what costs the time.</div>
+  </div>
+</section>
+
+<section class="slide ">
+  <div class="inner">
+    <div class="kicker">The problem</div>
+    <h2>Four points of friction before the analysis even starts</h2>
+    <div class="rule"></div>
+    <div class="cols c2 gap14">
+      <div class="card "><h3><span class="dot y"></span>Finding the data</h3><p>LiDAR is published by many agencies and projects, each with its own portal, tiling scheme, and naming. Knowing that coverage exists is half the work.</p></div>
+      <div class="card "><h3><span class="dot y"></span>Downloading the data</h3><p>Point clouds are large. Pulling whole tiles to study one watershed or one campus means gigabytes moved before you see a single point.</p></div>
+      <div class="card "><h3><span class="dot y"></span>Installing the software</h3><p>Desktop LiDAR and terrain tools need installers, licenses, plugins, and matching versions. That is a real barrier in a class, a workshop, or a locked-down laptop.</p></div>
+      <div class="card "><h3><span class="dot y"></span>Reproducing the result</h3><p>A chain of GUI clicks is hard to repeat or share. A colleague cannot easily rerun your workflow on a different area.</p></div>
+    </div>
+    <div class="sub mt26">The common assumption: <em>move the data to the software, and install the software first</em>.</div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre &middot; LiDAR and terrain analysis in the browser</div><div class="n"></div></div>
+</section>
+
+<section class="slide ">
+  <div class="inner">
+    <div class="kicker">What changed</div>
+    <h2>Three modern web technologies remove those barriers</h2>
+    <div class="rule"></div>
+    <div class="cols c3 gap14">
+      <div class="card "><h3><span class="dot "></span>Cloud-optimized data</h3><p>COPC and COG files sit on plain object storage. The browser reads only the byte ranges it needs, so you can open a huge dataset by fetching a small part of it.</p></div>
+      <div class="card "><h3><span class="dot t"></span>WebAssembly</h3><p>Compiled native code, such as the Whitebox geoprocessing engine, runs in the browser at near-native speed. The compute moves to the data's destination: your device.</p></div>
+      <div class="card "><h3><span class="dot "></span>Open catalogs and APIs</h3><p>STAC and public LiDAR indexes tell you what exists for any area, and return links you can open directly.</p></div>
+    </div>
+    <div class="card accent mt26" style="padding:26px 30px">
+      <p style="font-size:24px;color:#fff;line-height:1.6"><strong>Discover, stream, and process LiDAR without installing anything or uploading anything.</strong></p>
+      <p class="mt8" style="font-size:18px">The browser is the GIS, the file system is object storage, and the processing happens on your machine.</p>
+    </div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre &middot; LiDAR and terrain analysis in the browser</div><div class="n"></div></div>
+</section>
+
+<section class="slide ">
+  <div class="inner">
+    <div class="kicker">The data stack</div>
+    <h2>Formats that make LiDAR and terrain data web-friendly</h2>
+    <div class="rule"></div>
+    <table>
+      <tr><th style="width:14%">Format</th><th style="width:34%">What it is</th><th style="width:30%">Why it suits the browser</th><th>Typical use</th></tr>
+      <tr><td>LAS / LAZ</td><td>The standard point cloud file, LAZ being compressed</td><td>Universal, but usually read start to finish</td><td>Archival tiles, exchange</td></tr>
+      <tr><td>COPC</td><td>A LAZ file organized as a spatial octree</td><td>Range requests fetch just the nodes in view or in your area</td><td>Streaming and clipping point clouds</td></tr>
+      <tr><td>EPT</td><td>Entwine Point Tile, an octree of many files</td><td>Same idea, served as a directory of tiles</td><td>Large public LiDAR collections</td></tr>
+      <tr><td>COG</td><td>GeoTIFF with internal tiles and overviews</td><td>Reads only the window and zoom level needed</td><td>DEMs, hillshades, slope rasters</td></tr>
+      <tr><td>STAC</td><td>A JSON catalog and search API</td><td>Query by place and time, no portal needed</td><td>Finding datasets</td></tr>
+    </table>
+    <div class="cap mt14">Input can be COPC or LAZ; the DEM and every derived raster can be written back out as a COG.</div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre &middot; LiDAR and terrain analysis in the browser</div><div class="n"></div></div>
+</section>
+
+<section class="slide section">
+  <div class="inner">
+    <div class="big">02</div>
+    <h2>GeoLibre and Whitebox</h2>
+    <div class="sub">A full GIS that opens in a tab, with a geoprocessing engine that runs locally.</div>
+  </div>
+</section>
+
+<section class="slide ">
+  <div class="inner">
+    <div class="kicker">What GeoLibre is</div>
+    <h2>A free, cloud-native GIS that runs wherever you have a browser</h2>
+    <div class="rule"></div>
+    <div class="cols c4 gap14">
+      <div class="card kpi"><div class="v">Web</div><div class="k">web.geolibre.app, no install</div></div>
+      <div class="card kpi"><div class="v">Desktop</div><div class="k">Windows, macOS, Linux</div></div>
+      <div class="card kpi"><div class="v">Mobile</div><div class="k">Android</div></div>
+      <div class="card kpi"><div class="v">Jupyter</div><div class="k">pip install geolibre</div></div>
+    </div>
+    <div class="cols c2 gap14 mt20">
+      <div class="card "><h3><span class="dot "></span>Built on open standards</h3><p>MapLibre GL for the map, deck.gl for 3D and point clouds, DuckDB for SQL, and cloud-native formats read natively. MIT licensed.</p></div>
+      <div class="card "><h3><span class="dot t"></span>A plugin system</h3><p>Data catalogs, analysis tools, and the USGS LiDAR plugin are plugins, so capabilities grow without changing the core app.</p></div>
+    </div>
+    <div class="sub mt20">Same project, same tools, whichever surface you open it on.</div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre &middot; LiDAR and terrain analysis in the browser</div><div class="n"></div></div>
+</section>
+
+<section class="slide ">
+  <div class="inner">
+    <span class="pill">ENGINE</span>
+    <h2 class="mt14">Whitebox tools, <span class="thin">compiled to WebAssembly</span></h2>
+    <div class="rule" style="margin-bottom:16px"></div>
+    <div class="cols c12 gap14">
+      <div>
+        <div class="fig" style="height:300px"><img src="images/whitebox.webp" alt="The Whitebox toolbox running in the browser"></div>
+        <div class="cap">The Whitebox toolbox inside GeoLibre, executing in the page with no server and no Python sidecar</div>
+      </div>
+      <div>
+        <ul class="tight">
+          <li><strong>Whitebox</strong> is the open-source geoprocessing library created by <strong>Dr. John Lindsay</strong> (University of Guelph), long used for terrain, hydrology, and LiDAR analysis. GeoLibre builds on his <strong>Whitebox Next Gen</strong>: <code>github.com/jblindsay/whitebox_next_gen</code></li>
+          <li><strong>Compiled to WebAssembly</strong> via the open-source <strong>whitebox-wasm</strong> project (<code>github.com/opengeos/whitebox-wasm</code>), it loads as part of the page and runs in your browser's sandbox.</li>
+          <li class="t"><strong>Local by design</strong>: files you open are read from your disk and processed in memory. Nothing is uploaded to run a tool.</li>
+          <li class="t"><strong>Same toolbox everywhere</strong>: web, desktop, and Android expose the same tools.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre &middot; LiDAR and terrain analysis in the browser</div><div class="n"></div></div>
+</section>
+
+<section class="slide ">
+  <div class="inner">
+    <div class="kicker">The toolbox</div>
+    <h2>The categories that matter for LiDAR and terrain</h2>
+    <div class="rule"></div>
+    <div class="cols c21 gap14">
+      <table>
+        <tr><th style="width:20%">Category</th><th style="width:12%">Tools</th><th>Examples</th></tr>
+        <tr><td>LiDAR</td><td>66</td><td>thinning and conversion, ground filtering, classification, DEM/DSM gridding, point statistics</td></tr>
+        <tr><td>Terrain</td><td>99</td><td>slope, aspect, hillshade, curvature, viewshed, relative position</td></tr>
+        <tr><td>Hydrology</td><td>100</td><td>depression filling, flow direction, accumulation, watersheds, streams</td></tr>
+        <tr><td>Raster</td><td>255</td><td>algebra, filters, reclassification, zonal statistics</td></tr>
+        <tr><td>Conversion</td><td>49</td><td>write results to COG, GeoParquet, PMTiles</td></tr>
+      </table>
+      <div class="card accent"><h3><span class="dot y"></span>One chain, end to end</h3><p>Because LiDAR, terrain, and hydrology tools live in one toolbox, the output of one step is the input of the next, with no format conversion or software switch in between.</p></div>
+    </div>
+    <div class="cap mt14">Tool counts as shown in the GeoLibre toolbox (Whitebox Next Gen by Dr. John Lindsay, plus GeoLibre's own WASM tools).</div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre &middot; LiDAR and terrain analysis in the browser</div><div class="n"></div></div>
+</section>
+
+<section class="slide ">
+  <div class="inner">
+    <div class="kicker">Why local matters</div>
+    <h2>Processing in the browser changes who can do this work</h2>
+    <div class="rule"></div>
+    <div class="cols c3 gap14">
+      <div class="card "><h3><span class="dot "></span>Privacy</h3><p>Sensitive or pre-release surveys stay on the machine. There is no server that receives your point cloud.</p></div>
+      <div class="card "><h3><span class="dot t"></span>Access</h3><p>A student, a field team, or a city office needs only a browser. Setup time in a workshop drops to a URL.</p></div>
+      <div class="card "><h3><span class="dot y"></span>Cost</h3><p>No server to run, scale, or pay for. The user's own CPU does the work, and the host only serves static files.</p></div>
+    </div>
+    <div class="cols c2 gap14 mt20">
+      <div class="card "><h3><span class="dot "></span>Portability</h3><p>A project is a file that opens the same way on a laptop, a lab machine, or a phone.</p></div>
+      <div class="card "><h3><span class="dot t"></span>Reproducibility</h3><p>Tools run with explicit parameters, and the same workflow can be rebuilt with Model Builder or scripted from Python.</p></div>
+    </div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre &middot; LiDAR and terrain analysis in the browser</div><div class="n"></div></div>
+</section>
+
+<section class="slide section">
+  <div class="inner">
+    <div class="big">03</div>
+    <h2>Live demo</h2>
+    <div class="sub">From finding LiDAR to a DEM and terrain products, all in one browser tab.</div>
+  </div>
+</section>
+
+<section class="slide ">
+  <div class="inner">
+    <span class="pill demo">LIVE DEMO</span>
+    <h2 class="mt14">The workflow we will walk through</h2>
+    <div class="rule" style="margin-bottom:18px"></div>
+    <div class="cols c5 gap12">
+      <div class="card "><h3><span class="num" style="font-size:26px">1</span></h3><p style="font-size:18px;color:var(--fg)"><strong>Discover</strong></p><p class="mt8" style="font-size:15.5px">Pick an area and find available LiDAR</p></div>
+      <div class="card "><h3><span class="num" style="font-size:26px">2</span></h3><p style="font-size:18px;color:var(--fg)"><strong>Access</strong></p><p class="mt8" style="font-size:15.5px">Clip, stream COPC, thin and convert</p></div>
+      <div class="card "><h3><span class="num" style="font-size:26px">3</span></h3><p style="font-size:18px;color:var(--fg)"><strong>Visualize</strong></p><p class="mt8" style="font-size:15.5px">Point cloud in 3D, by elevation or class</p></div>
+      <div class="card accent"><h3><span class="num" style="font-size:26px">4</span></h3><p style="font-size:18px;color:var(--fg)"><strong>Generate</strong></p><p class="mt8" style="font-size:15.5px">Ground and first returns to DTM and DSM</p></div>
+      <div class="card teal"><h3><span class="num" style="font-size:26px">5</span></h3><p style="font-size:18px;color:var(--fg)"><strong>Analyze</strong></p><p class="mt8" style="font-size:15.5px">Hillshade, slope, hydrology, then export</p></div>
+    </div>
+    <div class="sub mt26">Open <code>web.geolibre.app</code> to follow along on your own laptop. Nothing to sign in to.</div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre &middot; LiDAR and terrain analysis in the browser</div><div class="n"></div></div>
+</section>
+
+<section class="slide ">
+  <div class="inner">
+    <span class="pill demo">DEMO 1 &amp; 2</span>
+    <h2 class="mt14">Discover and access LiDAR <span class="thin">without a bulk download</span></h2>
+    <div class="rule" style="margin-bottom:16px"></div>
+    <div class="cols c2 gap14">
+      <div>
+        <ul class="tight">
+          <li><strong>Draw an area of interest</strong> on the map, or zoom to a place.</li>
+          <li><strong>The USGS LiDAR plugin</strong> shows what 3DEP LiDAR coverage exists there, with project and collection details.</li>
+          <li class="t"><strong>Clip on the fly</strong>: only the points inside your area are requested, using range requests against COPC.</li>
+          <li class="t"><strong>Load the result</strong> as a layer: a few MB, not a tile archive.</li>
+        </ul>
+      </div>
+      <div class="card accent"><h3><span class="dot y"></span>What to point out</h3><p>Watch the network panel size, not the file size of the full collection. The ratio of what exists to what we fetched is the point of cloud-optimized formats.</p></div>
+    </div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre &middot; LiDAR and terrain analysis in the browser</div><div class="n"></div></div>
+</section>
+
+<section class="slide ">
+  <div class="inner">
+    <span class="pill demo">DEMO 3</span>
+    <h2 class="mt14">Explore the point cloud <span class="thin">in 3D</span></h2>
+    <div class="rule" style="margin-bottom:16px"></div>
+    <div class="cols c12 gap14">
+      <div>
+        <div class="fig" style="height:330px"><img src="images/GeoLibre-demo.webp" alt="3D data rendered on a MapLibre map in GeoLibre"></div>
+        <div class="cap">3D data rendering on deck.gl over the MapLibre map in GeoLibre</div>
+      </div>
+      <div>
+        <ul class="tight">
+          <li><strong>Color by elevation</strong> to read relief, buildings, and tree height at a glance.</li>
+          <li><strong>Color by classification</strong> to see ground, vegetation, buildings, and noise as classified by the data provider.</li>
+          <li class="t"><strong>Tune point size</strong> and tilt the view to check coverage and density before processing.</li>
+          <li class="t"><strong>Inspect first</strong>: gaps, noise, and ground density decide which tool settings you need next.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre &middot; LiDAR and terrain analysis in the browser</div><div class="n"></div></div>
+</section>
+
+<section class="slide ">
+  <div class="inner">
+    <span class="pill demo">DEMO 4</span>
+    <h2 class="mt14">Thin and convert <span class="thin">before you grid</span></h2>
+    <div class="rule" style="margin-bottom:16px"></div>
+    <div class="cols c2 gap14">
+      <div class="card "><h3><span class="dot "></span>LiDAR Grid Thin</h3>
+        <ul class="tight">
+          <li><strong>Streams the cloud</strong> and keeps at most N points per grid cell, so memory follows the output, not the input.</li>
+          <li><strong>Three settings</strong>: cell size in CRS units, points per cell, and which point wins: <code>nearest_center</code>, <code>lowest</code>, or <code>highest</code>.</li>
+          <li class="t"><strong>Noise is skipped</strong>: points classified 7 and 18 are never picked, so <code>lowest</code> is not a spike below the ground.</li>
+        </ul>
+      </div>
+      <div class="card teal"><h3><span class="dot t"></span>LiDAR Convert</h3>
+        <ul class="tight">
+          <li><strong>The file extension picks the format</strong>: <code>.las</code>, <code>.laz</code>, or <code>.copc.laz</code>.</li>
+          <li><strong>Behind the layer menu</strong>: Export on a LiDAR layer offers LAS, LAZ, or COPC and runs this tool in the page.</li>
+          <li class="t"><strong>Same points, new encoding</strong>: every export of the 1,610,378-point tile held identical coordinates.</li>
+        </ul>
+      </div>
+    </div>
+    <table class="mt20" style="font-size:16px">
+      <tr><th style="width:26%">Input</th><th style="width:16%">Points</th><th style="width:22%">Setting</th><th style="width:14%">Kept</th><th>Check</th></tr>
+      <tr><td>3DEP tile, 728 &times; 126 m</td><td>1,610,378</td><td>10 m, lowest</td><td>549</td><td>549 occupied 10 m cells</td></tr>
+      <tr><td>3DEP tile, 16.8M points</td><td>16,834,724</td><td>1 m, lowest</td><td>999,973</td><td>999,973 occupied 1 m cells (about 30 s)</td></tr>
+    </table>
+    <div class="cap mt14">Counts were checked against the same files read independently in Python. Every kept point is an original point.</div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre &middot; LiDAR and terrain analysis in the browser</div><div class="n"></div></div>
+</section>
+
+<section class="slide ">
+  <div class="inner">
+    <span class="pill demo">DEMO 5</span>
+    <h2 class="mt14">From points to a DEM <span class="thin">with Whitebox in WebAssembly</span></h2>
+    <div class="rule" style="margin-bottom:16px"></div>
+    <div class="cols c3 gap14">
+      <div class="card "><h3><span class="dot "></span>Ground to DTM</h3><p>Run <strong>LiDAR TIN Gridding</strong> with classes <code>1,7,18</code> excluded. On the demo tile that is 680,867 ground points, gridded to a 2 m <strong>DTM</strong> in about a second.</p></div>
+      <div class="card "><h3><span class="dot t"></span>First return to DSM</h3><p>Set returns to <code>first</code> and exclude noise (<code>7,18</code>): 1,066,968 points give a <strong>DSM</strong> that includes canopy and buildings.</p></div>
+      <div class="card "><h3><span class="dot y"></span>DSM minus DTM</h3><p>Run <strong>Subtract</strong> with the DSM first: a normalized surface, the <strong>height of trees and buildings above ground</strong>.</p></div>
+    </div>
+    <div class="cols c2 gap14 mt20">
+      <div class="card "><h3><span class="dot "></span>Choose a cell size</h3><p>Match it to point density. A resolution much finer than the data supports only adds empty or interpolated cells.</p></div>
+      <div class="card accent"><h3><span class="dot y"></span>Set the CRS first</h3><p>3DEP files declare a compound CRS (UTM plus NAVD88 height). The gridded raster can take the height code (EPSG:5703) and never appear. Run <strong>Assign Projection Lidar</strong> with the horizontal code (26912 here) first.</p></div>
+    </div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre &middot; LiDAR and terrain analysis in the browser</div><div class="n"></div></div>
+</section>
+
+<section class="slide ">
+  <div class="inner">
+    <span class="pill demo">DEMO 6</span>
+    <h2 class="mt14">Analyze the terrain <span class="thin">chain tools on the DEM</span></h2>
+    <div class="rule" style="margin-bottom:16px"></div>
+    <table style="font-size:16.5px">
+      <tr><th style="width:20%">Product</th><th style="width:40%">What it tells you</th><th>Typical next use</th></tr>
+      <tr><td>Hillshade</td><td>Shaded relief that makes landforms readable</td><td>Basemap under other layers</td></tr>
+      <tr><td>Slope and aspect</td><td>Steepness and facing direction of every cell</td><td>Landslide susceptibility, solar exposure</td></tr>
+      <tr><td>Curvature</td><td>Where the surface is convex or concave</td><td>Ridges, channels, erosion patterns</td></tr>
+      <tr><td>Fill depressions</td><td>A DEM that drains correctly</td><td>Input to hydrologic analysis</td></tr>
+      <tr><td>Flow accumulation</td><td>Where water concentrates</td><td>Streams, watersheds, flood paths</td></tr>
+      <tr><td>Viewshed</td><td>What can be seen from a point</td><td>Siting, visibility studies</td></tr>
+    </table>
+    <div class="cap mt14">Each result is a new layer. Style it, stack it, or send it into the next tool. For Slope, type an output name ending in <code>.tif</code>: with the default name the result does not reach the map.</div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre &middot; LiDAR and terrain analysis in the browser</div><div class="n"></div></div>
+</section>
+
+<section class="slide ">
+  <div class="inner">
+    <span class="pill demo">DEMO 7</span>
+    <h2 class="mt14">Export, save, and share <span class="thin">so others can repeat it</span></h2>
+    <div class="rule" style="margin-bottom:16px"></div>
+    <div class="cols c3 gap14">
+      <div class="card "><h3><span class="dot "></span>Export rasters</h3><p>Save the DEM and derived layers as <strong>COG</strong>. Export a point cloud as <strong>LAS, LAZ, or COPC</strong> from its layer menu.</p></div>
+      <div class="card "><h3><span class="dot t"></span>Save the project</h3><p>A GeoLibre project file captures layers, order, and styling. Open it again on any device.</p></div>
+      <div class="card "><h3><span class="dot y"></span>Rebuild as a model</h3><p>Wire the same tools in Model Builder to rerun the workflow on a different area with different inputs.</p></div>
+    </div>
+    <div class="card accent mt26" style="padding:22px 28px">
+      <p style="font-size:21px;color:#fff;line-height:1.6"><strong>The deliverable is a link and a file, not a software environment.</strong></p>
+      <p class="mt8" style="font-size:17px">The same workflow is available from Python (<code>pip install geolibre</code>) for notebooks and batch runs.</p>
+    </div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre &middot; LiDAR and terrain analysis in the browser</div><div class="n"></div></div>
+</section>
+
+<section class="slide ">
+  <div class="inner">
+    <div class="kicker">Honest limits</div>
+    <h2>What the browser can and cannot do today</h2>
+    <div class="rule"></div>
+    <div class="cols c2 gap14">
+      <div class="card "><h3><span class="dot y"></span>Memory is bounded</h3><p>WebAssembly in a browser tab has a hard memory ceiling. Clip to an area of interest, or thin first: Grid Thin streams a 16.8M-point tile.</p></div>
+      <div class="card "><h3><span class="dot y"></span>Not a cluster</h3><p>A country-scale batch is better run with a desktop or server pipeline. The browser excels at interactive, area-scale work.</p></div>
+      <div class="card "><h3><span class="dot y"></span>Device-dependent speed</h3><p>Processing uses your own CPU, so a laptop is faster than a phone. Large rasters take longer on older hardware.</p></div>
+      <div class="card "><h3><span class="dot t"></span>Desktop for the heavy case</h3><p>The GeoLibre desktop app uses the same tools when you need more resources, with the same project files.</p></div>
+    </div>
+    <div class="sub mt26">The workflow is the same; only the ceiling on dataset size changes.</div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre &middot; LiDAR and terrain analysis in the browser</div><div class="n"></div></div>
+</section>
+
+<section class="slide ">
+  <div class="inner">
+    <div class="kicker">Takeaways</div>
+    <h2>LiDAR and terrain analysis, now a URL away</h2>
+    <div class="rule"></div>
+    <ul class="big">
+      <li><strong>Accessible</strong>: open a tab and start. No installer, no account, no server.</li>
+      <li class="t"><strong>Portable</strong>: the same tools and projects run on web, desktop, Android, and Jupyter.</li>
+      <li><strong>Private</strong>: processing is local, so data stays on your machine.</li>
+      <li class="t"><strong>Reproducible</strong>: open standards, explicit tool parameters, and shareable project files.</li>
+    </ul>
+    <div class="sub mt20">Cloud-optimized data plus WebAssembly makes the browser a credible place to do serious terrain work.</div>
+  </div>
+  <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre &middot; LiDAR and terrain analysis in the browser</div><div class="n"></div></div>
+</section>
+
+<section class="slide end">
+  <div class="inner">
+    <img class="brandmark sm" src="images/geolibre.webp" alt="GeoLibre">
+    <div class="kicker">Thank you</div>
+    <h2 style="font-size:52px">Questions</h2>
+    <div class="rule" style="margin:22px 0 28px"></div>
+    <div class="cols c2 gap14">
+      <div class="card"><h3><span class="dot"></span>Try it now</h3>
+        <p style="font-size:17.5px;line-height:2">
+          Web app &nbsp;&nbsp;<code>web.geolibre.app</code><br>
+          Docs &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>geolibre.app</code><br>
+          Source &nbsp;&nbsp;&nbsp;&nbsp;<code>github.com/opengeos/GeoLibre</code><br>
+          Examples &nbsp;<code>share.geolibre.app</code>
+        </p>
+      </div>
+      <div class="card"><h3><span class="dot t"></span>Install and cite</h3>
+        <p style="font-size:17.5px;line-height:2">
+          Python &nbsp;&nbsp;&nbsp;<code>pip install geolibre</code><br>
+          Plugins &nbsp;&nbsp;<code>plugins.geolibre.app</code><br>
+          Licence &nbsp;&nbsp;MIT<br>
+          Cite &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>doi.org/10.5281/zenodo.20785400</code>
+        </p>
+      </div>
+    </div>
+    <div class="sub mt26" style="color:var(--fg3);font-size:17px">Wu, Q. (2026). GeoLibre: A lightweight, cloud-native GIS platform for visualizing, exploring, and analyzing geospatial data. Zenodo. https://doi.org/10.5281/zenodo.20785400</div>
+  </div>
+</section>
+</div></div>
+
+<div id="bar"></div>
+<div id="hud">
+  <button class="btn" id="btnToc" title="Contents (L)">Contents</button>
+  <button class="btn" id="btnFs" title="Fullscreen (F)">Fullscreen</button>
+</div>
+<div id="toc"><h4>CONTENTS &middot; CLICK TO JUMP &middot; ESC TO CLOSE</h4><ol id="tocList"></ol></div>
+<div id="help">&larr; &rarr; navigate &middot; F fullscreen &middot; L contents &middot; Ctrl+P export PDF</div>
+<div id="nav"><button id="navPrev" aria-label="Previous slide">‹</button><button id="navNext" aria-label="Next slide">›</button></div>
+<div id="rotate">Turn your phone sideways for a much bigger view</div>
+
+<script>
+(function(){
+  var slides = [].slice.call(document.querySelectorAll('.slide'));
+  var deck = document.getElementById('deck');
+  var bar = document.getElementById('bar');
+  var toc = document.getElementById('toc');
+  var tocList = document.getElementById('tocList');
+  var i = 0;
+
+  function titleOf(s){
+    var h = s.querySelector('h1,h2');
+    var t = h ? h.textContent.replace(/\s+/g,' ').trim() : '(Section)';
+    return t.length > 34 ? t.slice(0,34) + '…' : t;
+  }
+
+  slides.forEach(function(s, n){
+    var f = s.querySelector('.foot .n');
+    if (f) f.textContent = (n+1) + ' / ' + slides.length;
+    var li = document.createElement('li');
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    var num = document.createElement('span');
+    num.textContent = n + 1;
+    btn.appendChild(num);
+    btn.appendChild(document.createTextNode(titleOf(s)));
+    btn.addEventListener('click', function(){ go(n); toc.classList.remove('on'); });
+    li.appendChild(btn);
+    tocList.appendChild(li);
+  });
+
+  function fit(){
+    var vv = window.visualViewport;
+    var w = vv ? vv.width : window.innerWidth;
+    var h = vv ? vv.height : window.innerHeight;
+    deck.style.transform = 'translate(-50%,-50%) scale(' + Math.min(w / 1280, h / 720) + ')';
+  }
+
+  function go(n){
+    i = Math.max(0, Math.min(slides.length - 1, n));
+    slides.forEach(function(s, k){
+      s.classList.toggle('active', k === i);
+      if (k !== i) [].forEach.call(s.querySelectorAll('video'), function(v){ v.pause(); });
+    });
+    bar.style.width = ((i + 1) / slides.length * 100) + '%';
+    [].forEach.call(tocList.children, function(li, k){ li.classList.toggle('cur', k === i); });
+    try { history.replaceState(null, '', '#' + (i + 1)); } catch (e) {}
+  }
+
+  document.addEventListener('keydown', function(e){
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    var k = e.key;
+    // inside Contents, Space and Enter belong to the focused entry
+    if ((k === ' ' || k === 'Enter') && e.target.closest && e.target.closest('#toc')) return;
+    if (k === 'ArrowRight' || k === 'ArrowDown' || k === 'PageDown' || k === ' ') { e.preventDefault(); go(i+1); }
+    else if (k === 'ArrowLeft' || k === 'ArrowUp' || k === 'PageUp') { e.preventDefault(); go(i-1); }
+    else if (k === 'Home') { go(0); }
+    else if (k === 'End') { go(slides.length-1); }
+    else if (k === 'f' || k === 'F') { toggleFs(); }
+    else if (k === 'l' || k === 'L') { toggleToc(); }
+    else if (k === 'Escape') { toc.classList.remove('on'); }
+  });
+
+  function toggleToc(){
+    var on = toc.classList.toggle('on');
+    if (on) { var cur = tocList.children[i]; if (cur) cur.firstChild.focus(); }
+  }
+
+  function toggleFs(){
+    if (document.fullscreenElement) document.exitFullscreen();
+    else document.documentElement.requestFullscreen && document.documentElement.requestFullscreen();
+  }
+
+  document.getElementById('btnFs').addEventListener('click', toggleFs);
+  document.getElementById('btnToc').addEventListener('click', toggleToc);
+
+  var nav = document.getElementById('nav');
+  document.getElementById('navPrev').addEventListener('click', function(){ go(i-1); });
+  document.getElementById('navNext').addEventListener('click', function(){ go(i+1); });
+
+  // swipe to change slides (passive: native pinch-zoom and scrolling still work)
+  var tx = 0, ty = 0, tt = 0;
+  document.addEventListener('touchstart', function(e){
+    if (e.touches.length !== 1) return;
+    tx = e.touches[0].clientX; ty = e.touches[0].clientY; tt = Date.now();
+  }, { passive: true });
+  document.addEventListener('touchend', function(e){
+    if (!tt || toc.classList.contains('on')) return;
+    var t = e.changedTouches[0], dx = t.clientX - tx, dy = t.clientY - ty;
+    if (Date.now() - tt < 700 && Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.5) go(dx < 0 ? i + 1 : i - 1);
+    tt = 0;
+  }, { passive: true });
+
+  // one-time "turn your phone" hint, dismissed by tap or by rotating
+  var rot = document.getElementById('rotate');
+  function hint(){
+    if (window.innerWidth < 900 && window.innerHeight > window.innerWidth) {
+      rot.classList.add('show');
+      clearTimeout(hint.t);
+      hint.t = setTimeout(function(){ rot.classList.remove('show'); }, 6000);
+    } else {
+      rot.classList.remove('show');
+    }
+  }
+  rot.addEventListener('click', function(){ rot.classList.remove('show'); });
+
+  function relayout(){ fit(); hint(); }
+  window.addEventListener('resize', relayout);
+  window.addEventListener('orientationchange', function(){ setTimeout(relayout, 120); });
+  if (window.visualViewport) window.visualViewport.addEventListener('resize', fit);
+  relayout();
+  window.addEventListener('hashchange', function(){
+    var n = parseInt((location.hash || '').replace('#',''), 10);
+    if (!isNaN(n) && n - 1 !== i) go(n - 1);
+  });
+  var start = parseInt((location.hash || '').replace('#',''), 10);
+  go(isNaN(start) ? 0 : start - 1);
+})();
+</script>
+</body>
+</html>
