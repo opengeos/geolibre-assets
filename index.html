@@ -1,159 +1,172 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>GeoLibre Assets</title>
-    <meta
-      name="description"
-      content="Static asset hosting for GeoLibre, served from assets.geolibre.app"
-    />
-    <style>
-      :root {
-        color-scheme: light dark;
-        --bg: #ffffff;
-        --fg: #1f2328;
-        --muted: #59636e;
-        --border: #d1d9e0;
-        --accent: #0969da;
-        --code-bg: #f6f8fa;
-      }
-      @media (prefers-color-scheme: dark) {
-        :root {
-          --bg: #0d1117;
-          --fg: #e6edf3;
-          --muted: #9198a1;
-          --border: #3d444d;
-          --accent: #4493f8;
-          --code-bg: #161b22;
-        }
-      }
-      * {
-        box-sizing: border-box;
-      }
-      body {
-        margin: 0;
-        padding: 3rem 1.25rem 5rem;
-        background: var(--bg);
-        color: var(--fg);
-        font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica,
-          Arial, sans-serif;
-      }
-      main {
-        max-width: 44rem;
-        margin: 0 auto;
-      }
-      h1 {
-        margin: 0 0 0.25rem;
-        font-size: 1.9rem;
-        letter-spacing: -0.02em;
-      }
-      .lede {
-        margin: 0 0 2.5rem;
-        color: var(--muted);
-      }
-      h2 {
-        margin: 2.5rem 0 0.75rem;
-        font-size: 1.05rem;
-        text-transform: uppercase;
-        letter-spacing: 0.06em;
-        color: var(--muted);
-      }
-      a {
-        color: var(--accent);
-      }
-      code,
-      pre {
-        font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
-          monospace;
-        font-size: 0.875em;
-      }
-      pre {
-        overflow-x: auto;
-        padding: 0.9rem 1rem;
-        border: 1px solid var(--border);
-        border-radius: 6px;
-        background: var(--code-bg);
-      }
-      table {
-        width: 100%;
-        border-collapse: collapse;
-      }
-      th,
-      td {
-        padding: 0.5rem 0.6rem;
-        text-align: left;
-        border-bottom: 1px solid var(--border);
-      }
-      th {
-        font-size: 0.8rem;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        color: var(--muted);
-      }
-      td:first-child {
-        white-space: nowrap;
-        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-        font-size: 0.875em;
-      }
-      footer {
-        margin-top: 3.5rem;
-        padding-top: 1.25rem;
-        border-top: 1px solid var(--border);
-        color: var(--muted);
-        font-size: 0.9rem;
-      }
-    </style>
-  </head>
-  <body>
-    <main>
-      <h1>GeoLibre Assets</h1>
-      <p class="lede">
-        Static file hosting for
-        <a href="https://github.com/opengeos/GeoLibre">GeoLibre</a>. Files
-        committed to the repository are served from this domain.
-      </p>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GeoLibre Assets</title>
+<meta name="description" content="Static asset hosting for GeoLibre, served from assets.geolibre.app">
+<style>
+  :root {
+    --bg: #f6f8fa;
+    --fg: #1f2328;
+    --muted: #59636e;
+    --line: #d1d9e0;
+    --card: #ffffff;
+    --accent: #0969da;
+    --hover: #f6f8fa;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0d1117;
+      --fg: #e6edf3;
+      --muted: #9198a1;
+      --line: #3d444d;
+      --card: #161b22;
+      --accent: #4493f8;
+      --hover: #21262d;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  main { max-width: 880px; margin: 0 auto; padding: 40px 16px 64px; }
+  h1 { font-size: 26px; margin: 0 0 8px; }
+  .intro { color: var(--muted); margin: 0 0 28px; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  code { font: 13px ui-monospace, SFMono-Regular, Menlo, monospace; }
+  input {
+    width: 100%; padding: 9px 12px; margin-bottom: 24px;
+    border: 1px solid var(--line); border-radius: 8px;
+    background: var(--card); color: var(--fg); font: inherit;
+  }
+  details { margin-bottom: 20px; }
+  summary { font-weight: 600; margin: 0 0 8px; cursor: pointer; }
+  summary span { color: var(--muted); font-weight: 400; font-size: 13px; margin-left: 6px; }
+  ul {
+    list-style: none; margin: 0; padding: 0;
+    border: 1px solid var(--line); border-radius: 10px;
+    background: var(--card); overflow: hidden;
+  }
+  li {
+    display: flex; align-items: center; gap: 12px;
+    padding: 8px 12px; border-top: 1px solid var(--line);
+  }
+  li:first-child { border-top: 0; }
+  li:hover { background: var(--hover); }
+  li a { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+  .size { color: var(--muted); font-size: 13px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  button {
+    border: 1px solid var(--line); background: transparent; color: var(--muted);
+    border-radius: 6px; padding: 2px 8px; font: 12px inherit; cursor: pointer;
+  }
+  button:hover { color: var(--fg); }
+  .status { color: var(--muted); }
+  footer { color: var(--muted); font-size: 13px; margin-top: 40px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>GeoLibre Assets</h1>
+  <p class="intro">
+    Static file hosting for <a href="https://github.com/opengeos/GeoLibre">GeoLibre</a>.
+    Every file in the <a href="https://github.com/opengeos/geolibre-assets">repository</a>
+    is served at the matching path, e.g. <code>https://assets.geolibre.app/data/&lt;file&gt;</code>.
+  </p>
+  <input id="filter" type="search" placeholder="Filter files…" aria-label="Filter files">
+  <div id="list"><p class="status">Loading file list…</p></div>
+  <footer>
+    <a href="https://github.com/opengeos/geolibre-assets">opengeos/geolibre-assets</a>
+    &middot; <a href="LICENSE">MIT License</a>
+  </footer>
+</main>
+<script>
+  // The list is read from the GitHub API so it stays current without a build step.
+  const REPO = "opengeos/geolibre-assets";
+  // Large directories start collapsed unless a filter is active.
+  const COLLAPSE_OVER = 25;
+  const HIDDEN = new Set([".gitignore", ".nojekyll", "CNAME", "index.html", ".gitkeep"]);
+  const list = document.getElementById("list");
+  const filter = document.getElementById("filter");
+  let groups = new Map();
 
-      <h2>Usage</h2>
-      <pre><code>https://assets.geolibre.app/&lt;path-in-repo&gt;
+  function formatSize(bytes) {
+    if (bytes < 1024) return bytes + " B";
+    const units = ["KB", "MB", "GB"];
+    let i = -1;
+    do { bytes /= 1024; i++; } while (bytes >= 1024 && i < units.length - 1);
+    return bytes.toFixed(bytes < 10 ? 1 : 0) + " " + units[i];
+  }
 
-# e.g. images/logo.png in the repo:
-https://assets.geolibre.app/images/logo.png</code></pre>
+  function render() {
+    const q = filter.value.trim().toLowerCase();
+    list.replaceChildren();
+    for (const [dir, files] of groups) {
+      const shown = files.filter(f => f.path.toLowerCase().includes(q));
+      if (!shown.length) continue;
+      const section = document.createElement("details");
+      section.open = q !== "" || shown.length <= COLLAPSE_OVER;
+      const h2 = document.createElement("summary");
+      h2.textContent = dir === "" ? "/" : dir + "/";
+      const count = document.createElement("span");
+      count.textContent = shown.length + (shown.length === 1 ? " file" : " files");
+      h2.append(count);
+      const ul = document.createElement("ul");
+      for (const f of shown) {
+        const li = document.createElement("li");
+        const a = document.createElement("a");
+        a.href = f.path;
+        a.textContent = f.path.slice(dir ? dir.length + 1 : 0);
+        const size = document.createElement("span");
+        size.className = "size";
+        size.textContent = formatSize(f.size);
+        const copy = document.createElement("button");
+        copy.textContent = "Copy URL";
+        copy.onclick = async () => {
+          try {
+            await navigator.clipboard.writeText(new URL(f.path, location.href).href);
+            copy.textContent = "Copied";
+          } catch {
+            copy.textContent = "Failed";
+          }
+          setTimeout(() => (copy.textContent = "Copy URL"), 1200);
+        };
+        li.append(a, size, copy);
+        ul.append(li);
+      }
+      section.append(h2, ul);
+      list.append(section);
+    }
+    if (!list.children.length) {
+      list.innerHTML = '<p class="status">No matching files.</p>';
+    }
+  }
 
-      <h2>Directories</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Path</th>
-            <th>Contents</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>data/</td>
-            <td>Sample datasets (GeoJSON, PMTiles, CSV, Parquet)</td>
-          </tr>
-          <tr>
-            <td>images/</td>
-            <td>Images, logos, icons, screenshots</td>
-          </tr>
-          <tr>
-            <td>styles/</td>
-            <td>MapLibre style JSON and sprite resources</td>
-          </tr>
-          <tr>
-            <td>fonts/</td>
-            <td>Font glyph PBFs</td>
-          </tr>
-        </tbody>
-      </table>
-
-      <footer>
-        <a href="https://github.com/opengeos/geolibre-assets"
-          >opengeos/geolibre-assets</a
-        >
-        &middot; MIT License
-      </footer>
-    </main>
-  </body>
+  fetch(`https://api.github.com/repos/${REPO}/git/trees/main?recursive=1`)
+    .then(r => (r.ok ? r.json() : Promise.reject(r.status)))
+    .then(data => {
+      const files = data.tree
+        .filter(e => e.type === "blob")
+        .filter(e => !HIDDEN.has(e.path.split("/").pop()) && !e.path.startsWith(".github/"));
+      for (const f of files) {
+        const dir = f.path.includes("/") ? f.path.slice(0, f.path.lastIndexOf("/")) : "";
+        if (!groups.has(dir)) groups.set(dir, []);
+        groups.get(dir).push(f);
+      }
+      // Directories first (alphabetical), root files last.
+      groups = new Map([...groups].sort(([a], [b]) =>
+        (a === "") - (b === "") || a.localeCompare(b)));
+      render();
+    })
+    .catch(() => {
+      list.innerHTML = `<p class="status">Could not load the file list from GitHub.
+        Browse it on <a href="https://github.com/${REPO}">GitHub</a> instead.</p>`;
+    });
+  filter.addEventListener("input", render);
+</script>
+</body>
 </html>
