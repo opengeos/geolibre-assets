@@ -18,6 +18,7 @@ url:    https://assets.geolibre.app/images/logo.png
 | `images/` | Images, logos, icons, screenshots               |
 | `styles/` | MapLibre style JSON and sprite/glyph resources  |
 | `fonts/`  | Font glyph PBFs                                 |
+| `opera/`  | NASA OPERA gallery: `projects/*.geolibre.json`, `images/*.webp` screenshots and `thumbnails/*.webp` map crops for <https://opera-plugin.geolibre.app/gallery/> |
 
 ## Adding files
 
