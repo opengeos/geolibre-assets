@@ -1,0 +1,135 @@
+{
+  "$schema": "https://geolibre.app/schemas/model-graph-v1.json",
+  "version": "1.0.0",
+  "name": "DEM Stream Network Extraction",
+  "graph": {
+    "nodes": [
+      {
+        "id": "62588568-f000-47ed-a9ca-0d7e2315e597",
+        "kind": "input",
+        "layerId": "raster-3aaf0qw",
+        "x": 40,
+        "y": 40
+      },
+      {
+        "id": "6c4987a2-cb7c-4312-89a7-20dbc5323696",
+        "kind": "output",
+        "name": "Extracted Stream Network",
+        "x": 1000,
+        "y": 40
+      },
+      {
+        "id": "84b58170-0ff0-4137-aa6a-9cf287091e16",
+        "kind": "tool",
+        "provider": "whitebox",
+        "toolId": "fill_depressions_wang_and_liu",
+        "parameters": {
+          "fix_flats": true,
+          "flat_increment": 0.0001
+        },
+        "x": 280,
+        "y": 40
+      },
+      {
+        "id": "90971e39-7a88-48a1-b344-831dc677821d",
+        "kind": "tool",
+        "x": 760,
+        "y": 40,
+        "provider": "whitebox",
+        "toolId": "raster_streams_to_vector",
+        "parameters": {
+          "esri_pntr": false
+        }
+      },
+      {
+        "id": "2150be08-967b-4e8a-8350-bab5dbd67267",
+        "kind": "tool",
+        "x": 280,
+        "y": 160,
+        "provider": "whitebox",
+        "toolId": "d8_flow_accum",
+        "parameters": {
+          "clip": false,
+          "esri_pntr": false,
+          "input_is_pointer": true,
+          "log_transform": false,
+          "out_type": "cells"
+        }
+      },
+      {
+        "id": "0095f036-3f6f-45e7-8ec3-b0c627618052",
+        "kind": "tool",
+        "x": 520,
+        "y": 40,
+        "provider": "whitebox",
+        "toolId": "d8_pointer",
+        "parameters": {
+          "esri_pntr": false
+        }
+      },
+      {
+        "id": "2796a1d9-22a7-4415-b702-ee1aaad94c64",
+        "kind": "tool",
+        "provider": "whitebox",
+        "toolId": "extract_streams",
+        "parameters": {
+          "threshold": 1000,
+          "zero_background": false
+        },
+        "x": 520,
+        "y": 160
+      }
+    ],
+    "edges": [
+      {
+        "id": "c8963881-adcc-460c-bef4-17c5ce0c6a82",
+        "from": "62588568-f000-47ed-a9ca-0d7e2315e597",
+        "fromPort": "out",
+        "to": "84b58170-0ff0-4137-aa6a-9cf287091e16",
+        "toPort": "dem"
+      },
+      {
+        "id": "c69541cf-c70f-44d7-a14b-f0b80797f243",
+        "from": "2150be08-967b-4e8a-8350-bab5dbd67267",
+        "fromPort": "output",
+        "to": "2796a1d9-22a7-4415-b702-ee1aaad94c64",
+        "toPort": "flow_accumulation"
+      },
+      {
+        "id": "49485506-d6f1-4c11-88b7-42c96fdfdf8d",
+        "from": "84b58170-0ff0-4137-aa6a-9cf287091e16",
+        "fromPort": "output",
+        "to": "0095f036-3f6f-45e7-8ec3-b0c627618052",
+        "toPort": "dem"
+      },
+      {
+        "id": "291189a3-726b-454a-9562-84ba4a8ed451",
+        "from": "0095f036-3f6f-45e7-8ec3-b0c627618052",
+        "fromPort": "output",
+        "to": "2150be08-967b-4e8a-8350-bab5dbd67267",
+        "toPort": "input"
+      },
+      {
+        "id": "11a182a3-c81b-433d-ad17-e833979589a5",
+        "from": "0095f036-3f6f-45e7-8ec3-b0c627618052",
+        "fromPort": "output",
+        "to": "90971e39-7a88-48a1-b344-831dc677821d",
+        "toPort": "d8_pntr"
+      },
+      {
+        "id": "8f7a974a-b6f0-43a4-bd2f-1f1dab696f90",
+        "from": "2796a1d9-22a7-4415-b702-ee1aaad94c64",
+        "fromPort": "output",
+        "to": "90971e39-7a88-48a1-b344-831dc677821d",
+        "toPort": "streams_raster"
+      },
+      {
+        "id": "7b42a464-664c-42ae-a004-3aa973a515b7",
+        "from": "90971e39-7a88-48a1-b344-831dc677821d",
+        "fromPort": "output",
+        "to": "6c4987a2-cb7c-4312-89a7-20dbc5323696",
+        "toPort": "in"
+      }
+    ]
+  }
+}
