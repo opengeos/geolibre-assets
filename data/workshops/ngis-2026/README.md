@@ -11,7 +11,7 @@ Served at `https://assets.geolibre.app/data/workshops/ngis-2026/<file>`.
 | `nv_counties.geojson` | GeoJSON | 17 Nevada counties | US Census Bureau, 2023 cartographic boundary (1:500k) |
 | `us_states.geojson` | GeoJSON (simplified) | 56 states and territories | US Census Bureau, 2023 cartographic boundary (1:500k) |
 | `us_counties.fgb` | FlatGeobuf | 3,235 counties | US Census Bureau, 2023 cartographic boundary (1:500k) |
-| `us_counties.parquet` | GeoParquet 1.1 (bbox-sorted, covering bbox, ZSTD) | 3,235 counties | same as above |
+| `us_counties.parquet` | GeoParquet 1.1 (bbox-sorted, covering bbox, 256-row groups, ZSTD) | 3,235 counties | same as above |
 | `us_counties.pmtiles` | PMTiles vector tiles, z0-10, layer `counties` | 3,235 counties | same as above |
 | `nv_earthquakes.csv` | CSV (longitude/latitude) | 8,031 events, M2.5+, 2016-2025 | USGS ANSS ComCat (FDSN event service) |
 | `nv_earthquakes.parquet` | GeoParquet points | 8,031 events | same as above |
