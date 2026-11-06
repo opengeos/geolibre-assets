@@ -10,3 +10,10 @@ synthetic workshop dataset. No private data or credentials appear in these image
 
 Teaching materials: opengeos/GeoLibre, `docs/workshops/ngis-2026/`.
 Published URL prefix: https://assets.geolibre.app/images/workshops/ngis-2026/
+
+## Section screenshots (`s01-*.webp` to `s08-*.webp`)
+
+Captured from web.geolibre.app on 2026-11-05 while running each workshop
+section end to end with the real public datasets in
+`data/workshops/ngis-2026/`. The matching finished projects are in
+`projects/workshops/ngis-2026/`.
