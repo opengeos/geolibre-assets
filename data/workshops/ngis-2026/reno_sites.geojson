@@ -1,0 +1,10 @@
+{"type":"FeatureCollection","features":[
+{"type":"Feature","properties":{"name":"UNR Knowledge Center (workshop venue)","kind":"campus"},"geometry":{"type":"Point","coordinates":[-119.8160,39.5444]}},
+{"type":"Feature","properties":{"name":"Reno-Tahoe International Airport","kind":"airport"},"geometry":{"type":"Point","coordinates":[-119.7681,39.4991]}},
+{"type":"Feature","properties":{"name":"Downtown Reno","kind":"city"},"geometry":{"type":"Point","coordinates":[-119.8138,39.5296]}},
+{"type":"Feature","properties":{"name":"Nevada State Capitol, Carson City","kind":"city"},"geometry":{"type":"Point","coordinates":[-119.7664,39.1638]}},
+{"type":"Feature","properties":{"name":"Virginia City","kind":"city"},"geometry":{"type":"Point","coordinates":[-119.6496,39.3096]}},
+{"type":"Feature","properties":{"name":"Mount Rose summit","kind":"peak"},"geometry":{"type":"Point","coordinates":[-119.9179,39.3438]}},
+{"type":"Feature","properties":{"name":"Incline Village","kind":"city"},"geometry":{"type":"Point","coordinates":[-119.9435,39.2513]}},
+{"type":"Feature","properties":{"name":"Tahoe City","kind":"city"},"geometry":{"type":"Point","coordinates":[-120.1452,39.1677]}}
+]}
