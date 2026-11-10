@@ -1,0 +1,133 @@
+{
+  "$schema": "https://geolibre.app/schemas/model-graph-v1.json",
+  "version": "1.0.0",
+  "name": "Height Above Nearest Drainage",
+  "graph": {
+    "nodes": [
+      {
+        "id": "03959fd2-eb24-5b38-ac2c-a5ef44817966",
+        "kind": "input",
+        "layerId": "sample-dem",
+        "x": 40,
+        "y": 40
+      },
+      {
+        "id": "3592d71d-6321-553c-b5f7-26fdd9daa666",
+        "kind": "tool",
+        "provider": "whitebox",
+        "toolId": "breach_depressions_least_cost",
+        "parameters": {
+          "max_dist": 100,
+          "fill_deps": true
+        },
+        "x": 280,
+        "y": 40
+      },
+      {
+        "id": "0a1c5800-1d0e-59b6-9696-e4fbe7bc7c95",
+        "kind": "tool",
+        "provider": "whitebox",
+        "toolId": "d8_pointer",
+        "parameters": {
+          "esri_pntr": false
+        },
+        "x": 520,
+        "y": 40
+      },
+      {
+        "id": "b4b8b8d0-a7df-553e-b19e-e7ae967c7b9d",
+        "kind": "tool",
+        "provider": "whitebox",
+        "toolId": "d8_flow_accum",
+        "parameters": {
+          "out_type": "cells",
+          "log_transform": false,
+          "clip": false,
+          "input_is_pointer": true,
+          "esri_pntr": false
+        },
+        "x": 280,
+        "y": 160
+      },
+      {
+        "id": "c2fa72e0-1e41-5f79-88b6-2f35663aa6ea",
+        "kind": "tool",
+        "provider": "whitebox",
+        "toolId": "extract_streams",
+        "parameters": {
+          "threshold": 1000,
+          "zero_background": true
+        },
+        "x": 520,
+        "y": 160
+      },
+      {
+        "id": "4ff67459-220e-5833-b1c6-54a9fd2bbbc6",
+        "kind": "tool",
+        "provider": "whitebox",
+        "toolId": "elevation_above_stream",
+        "parameters": {},
+        "x": 760,
+        "y": 40
+      },
+      {
+        "id": "621916d7-ff3a-5a7a-ba0f-c074a20a817c",
+        "kind": "output",
+        "name": "Height Above Nearest Drainage",
+        "x": 1000,
+        "y": 40
+      }
+    ],
+    "edges": [
+      {
+        "id": "078c9dd6-c0ac-5f8f-9ea1-73fa04030b00",
+        "from": "03959fd2-eb24-5b38-ac2c-a5ef44817966",
+        "fromPort": "out",
+        "to": "3592d71d-6321-553c-b5f7-26fdd9daa666",
+        "toPort": "dem"
+      },
+      {
+        "id": "3a6da344-a322-5191-8cfc-869ac4e68d54",
+        "from": "3592d71d-6321-553c-b5f7-26fdd9daa666",
+        "fromPort": "output",
+        "to": "0a1c5800-1d0e-59b6-9696-e4fbe7bc7c95",
+        "toPort": "dem"
+      },
+      {
+        "id": "618872d1-2b4f-553b-88b7-8e040ed3a5f5",
+        "from": "0a1c5800-1d0e-59b6-9696-e4fbe7bc7c95",
+        "fromPort": "output",
+        "to": "b4b8b8d0-a7df-553e-b19e-e7ae967c7b9d",
+        "toPort": "input"
+      },
+      {
+        "id": "f1a7b2c7-7b45-56f0-878a-c1400b00d416",
+        "from": "b4b8b8d0-a7df-553e-b19e-e7ae967c7b9d",
+        "fromPort": "output",
+        "to": "c2fa72e0-1e41-5f79-88b6-2f35663aa6ea",
+        "toPort": "flow_accumulation"
+      },
+      {
+        "id": "69ffd5f2-31fd-529e-adf6-87056d5c077e",
+        "from": "3592d71d-6321-553c-b5f7-26fdd9daa666",
+        "fromPort": "output",
+        "to": "4ff67459-220e-5833-b1c6-54a9fd2bbbc6",
+        "toPort": "dem"
+      },
+      {
+        "id": "18de24f1-594a-5a46-b79b-1ada8b657ce1",
+        "from": "c2fa72e0-1e41-5f79-88b6-2f35663aa6ea",
+        "fromPort": "output",
+        "to": "4ff67459-220e-5833-b1c6-54a9fd2bbbc6",
+        "toPort": "streams"
+      },
+      {
+        "id": "8b0fa744-f66d-5cff-9d3f-0dc34061d010",
+        "from": "4ff67459-220e-5833-b1c6-54a9fd2bbbc6",
+        "fromPort": "output",
+        "to": "621916d7-ff3a-5a7a-ba0f-c074a20a817c",
+        "toPort": "in"
+      }
+    ]
+  }
+}

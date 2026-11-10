@@ -17,10 +17,10 @@
         "provider": "whitebox",
         "toolId": "contours_from_raster",
         "parameters": {
-          "contour_interval": 100,
-          "base_contour": 0,
-          "smoothing_filter_size": 9,
-          "deflection_tolerance": 10
+          "interval": 100,
+          "base": 0,
+          "smooth": 9,
+          "tolerance": 10
         },
         "x": 280,
         "y": 40
