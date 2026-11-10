@@ -117,11 +117,11 @@
         "toPort": "d8_pntr"
       },
       {
-        "id": "abeba416-bf32-5432-a4d7-9b9e25c4282d",
+        "id": "4f6730ad-1128-5a54-be42-95fd4de173e3",
         "from": "cc4640a1-b4aa-5748-84bc-5e8b7caffefd",
         "fromPort": "output",
         "to": "d42a8090-ccf1-569a-9231-32c9689d28db",
-        "toPort": "streams"
+        "toPort": "streams_raster"
       },
       {
         "id": "02ae493e-e699-5757-9544-e03917cc8e77",
