@@ -1,0 +1,117 @@
+{
+  "$schema": "https://geolibre.app/schemas/model-graph-v1.json",
+  "version": "1.0.0",
+  "name": "DEM Terrain Derivatives",
+  "graph": {
+    "nodes": [
+      {
+        "id": "254ab2f5-e620-53c3-a1d6-5f03cc7e592f",
+        "kind": "input",
+        "layerId": "sample-dem",
+        "x": 40,
+        "y": 40
+      },
+      {
+        "id": "c9d78302-b595-58a5-afaf-f71409e728d0",
+        "kind": "tool",
+        "provider": "whitebox",
+        "toolId": "multidirectional_hillshade",
+        "parameters": {
+          "altitude": 30,
+          "z_factor": 1,
+          "full_360_mode": false
+        },
+        "x": 280,
+        "y": 40
+      },
+      {
+        "id": "0a025b44-39f4-5738-adf9-7a032677710c",
+        "kind": "tool",
+        "provider": "whitebox",
+        "toolId": "slope",
+        "parameters": {
+          "units": "degrees",
+          "z_factor": 1
+        },
+        "x": 280,
+        "y": 160
+      },
+      {
+        "id": "29023c7b-03e4-5f03-8d0a-c195c914a0c6",
+        "kind": "tool",
+        "provider": "whitebox",
+        "toolId": "aspect",
+        "parameters": {
+          "z_factor": 1
+        },
+        "x": 280,
+        "y": 280
+      },
+      {
+        "id": "58595df3-ac38-571c-9c59-2c6001ebe7ee",
+        "kind": "output",
+        "name": "Hillshade",
+        "x": 520,
+        "y": 40
+      },
+      {
+        "id": "bbe622db-0d72-57aa-b3f1-dda31a7e2a61",
+        "kind": "output",
+        "name": "Slope (degrees)",
+        "x": 520,
+        "y": 160
+      },
+      {
+        "id": "f907671f-dacb-5048-afff-e9d053f39b3c",
+        "kind": "output",
+        "name": "Aspect",
+        "x": 520,
+        "y": 280
+      }
+    ],
+    "edges": [
+      {
+        "id": "f24f2955-3660-5f98-ae05-a48d2ec77be6",
+        "from": "254ab2f5-e620-53c3-a1d6-5f03cc7e592f",
+        "fromPort": "out",
+        "to": "c9d78302-b595-58a5-afaf-f71409e728d0",
+        "toPort": "input"
+      },
+      {
+        "id": "6d3f7640-2a84-55ec-a42a-fc5a422a7b5d",
+        "from": "254ab2f5-e620-53c3-a1d6-5f03cc7e592f",
+        "fromPort": "out",
+        "to": "0a025b44-39f4-5738-adf9-7a032677710c",
+        "toPort": "input"
+      },
+      {
+        "id": "9f2d1e39-9581-5a7c-b3c5-0fbe2c11ea9c",
+        "from": "254ab2f5-e620-53c3-a1d6-5f03cc7e592f",
+        "fromPort": "out",
+        "to": "29023c7b-03e4-5f03-8d0a-c195c914a0c6",
+        "toPort": "input"
+      },
+      {
+        "id": "d2e9a444-f484-5b64-98bd-719943e3ce27",
+        "from": "c9d78302-b595-58a5-afaf-f71409e728d0",
+        "fromPort": "output",
+        "to": "58595df3-ac38-571c-9c59-2c6001ebe7ee",
+        "toPort": "in"
+      },
+      {
+        "id": "786d327f-f180-5c57-afa7-debe8e624d95",
+        "from": "0a025b44-39f4-5738-adf9-7a032677710c",
+        "fromPort": "output",
+        "to": "bbe622db-0d72-57aa-b3f1-dda31a7e2a61",
+        "toPort": "in"
+      },
+      {
+        "id": "5e2de8ce-c7c8-55c6-bc73-d1a8edaaa6d1",
+        "from": "29023c7b-03e4-5f03-8d0a-c195c914a0c6",
+        "fromPort": "output",
+        "to": "f907671f-dacb-5048-afff-e9d053f39b3c",
+        "toPort": "in"
+      }
+    ]
+  }
+}

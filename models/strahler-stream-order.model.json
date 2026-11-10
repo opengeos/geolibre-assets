@@ -1,0 +1,136 @@
+{
+  "$schema": "https://geolibre.app/schemas/model-graph-v1.json",
+  "version": "1.0.0",
+  "name": "Strahler Stream Order",
+  "graph": {
+    "nodes": [
+      {
+        "id": "241c5806-5f7c-5e63-96f5-45a91c3c4e1c",
+        "kind": "input",
+        "layerId": "sample-dem",
+        "x": 40,
+        "y": 40
+      },
+      {
+        "id": "ab1e8b61-fe9a-5e64-ba5e-67b6cefb7cc9",
+        "kind": "tool",
+        "provider": "whitebox",
+        "toolId": "breach_depressions_least_cost",
+        "parameters": {
+          "max_dist": 100,
+          "fill_deps": true
+        },
+        "x": 280,
+        "y": 40
+      },
+      {
+        "id": "23b8835c-92f3-5565-8feb-bd64c5502075",
+        "kind": "tool",
+        "provider": "whitebox",
+        "toolId": "d8_pointer",
+        "parameters": {
+          "esri_pntr": false
+        },
+        "x": 520,
+        "y": 40
+      },
+      {
+        "id": "a721a13c-0a6e-54a0-85a3-6f714cc82e62",
+        "kind": "tool",
+        "provider": "whitebox",
+        "toolId": "d8_flow_accum",
+        "parameters": {
+          "out_type": "cells",
+          "log_transform": false,
+          "clip": false,
+          "input_is_pointer": true,
+          "esri_pntr": false
+        },
+        "x": 280,
+        "y": 160
+      },
+      {
+        "id": "634c7f19-3022-53b7-8244-e18841118c7e",
+        "kind": "tool",
+        "provider": "whitebox",
+        "toolId": "extract_streams",
+        "parameters": {
+          "threshold": 2000,
+          "zero_background": true
+        },
+        "x": 520,
+        "y": 160
+      },
+      {
+        "id": "c23d9fdc-874e-5eef-8e29-0ce4a0fe7c3e",
+        "kind": "tool",
+        "provider": "whitebox",
+        "toolId": "strahler_stream_order",
+        "parameters": {
+          "esri_pntr": false,
+          "zero_background": true
+        },
+        "x": 760,
+        "y": 40
+      },
+      {
+        "id": "1e7bdb94-0fc3-58c1-829f-a1f9e1319fc2",
+        "kind": "output",
+        "name": "Strahler Stream Order",
+        "x": 1000,
+        "y": 40
+      }
+    ],
+    "edges": [
+      {
+        "id": "f54d5932-f5ea-5b9f-8bc6-0dd9c632728a",
+        "from": "241c5806-5f7c-5e63-96f5-45a91c3c4e1c",
+        "fromPort": "out",
+        "to": "ab1e8b61-fe9a-5e64-ba5e-67b6cefb7cc9",
+        "toPort": "dem"
+      },
+      {
+        "id": "d20f4563-f79d-5f78-a8d3-6a7aef6a1c64",
+        "from": "ab1e8b61-fe9a-5e64-ba5e-67b6cefb7cc9",
+        "fromPort": "output",
+        "to": "23b8835c-92f3-5565-8feb-bd64c5502075",
+        "toPort": "dem"
+      },
+      {
+        "id": "58bc613f-c127-5dee-91a4-f44bfd4fd308",
+        "from": "23b8835c-92f3-5565-8feb-bd64c5502075",
+        "fromPort": "output",
+        "to": "a721a13c-0a6e-54a0-85a3-6f714cc82e62",
+        "toPort": "input"
+      },
+      {
+        "id": "07b60253-bcdb-541c-ae8d-3dbbfec98df0",
+        "from": "a721a13c-0a6e-54a0-85a3-6f714cc82e62",
+        "fromPort": "output",
+        "to": "634c7f19-3022-53b7-8244-e18841118c7e",
+        "toPort": "flow_accumulation"
+      },
+      {
+        "id": "7a485a87-34f8-5d13-ac0d-80cd119a7b13",
+        "from": "23b8835c-92f3-5565-8feb-bd64c5502075",
+        "fromPort": "output",
+        "to": "c23d9fdc-874e-5eef-8e29-0ce4a0fe7c3e",
+        "toPort": "d8_pntr"
+      },
+      {
+        "id": "e626aa97-5144-5692-a981-9349ebc8d468",
+        "from": "634c7f19-3022-53b7-8244-e18841118c7e",
+        "fromPort": "output",
+        "to": "c23d9fdc-874e-5eef-8e29-0ce4a0fe7c3e",
+        "toPort": "streams"
+      },
+      {
+        "id": "ff2e9892-12be-5a1c-8eac-4f862d523e26",
+        "from": "c23d9fdc-874e-5eef-8e29-0ce4a0fe7c3e",
+        "fromPort": "output",
+        "to": "1e7bdb94-0fc3-58c1-829f-a1f9e1319fc2",
+        "toPort": "in"
+      }
+    ]
+  }
+}

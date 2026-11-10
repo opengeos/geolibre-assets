@@ -1,0 +1,118 @@
+{
+  "$schema": "https://geolibre.app/schemas/model-graph-v1.json",
+  "version": "1.0.0",
+  "name": "Route Stations Near Cities",
+  "graph": {
+    "nodes": [
+      {
+        "id": "3543910f-6901-52ce-9052-e8c410aa2823",
+        "kind": "input",
+        "layerId": "sample-places",
+        "x": 40,
+        "y": 40
+      },
+      {
+        "id": "2c78a072-bf40-5024-abce-76371aa55295",
+        "kind": "input",
+        "layerId": "sample-routes",
+        "x": 40,
+        "y": 160
+      },
+      {
+        "id": "e6cb2a8a-b250-5313-a357-83af3c267eed",
+        "kind": "tool",
+        "provider": "vector",
+        "toolId": "buffer",
+        "parameters": {
+          "distance": 50,
+          "units": "kilometers",
+          "side": "outside",
+          "dissolve": true
+        },
+        "x": 280,
+        "y": 40
+      },
+      {
+        "id": "c5355849-f3f9-5ffd-97c3-2d95eeda731c",
+        "kind": "tool",
+        "provider": "vector",
+        "toolId": "points-along-geometry",
+        "parameters": {
+          "interval": 25,
+          "units": "kilometers"
+        },
+        "x": 280,
+        "y": 160
+      },
+      {
+        "id": "8cacd88f-0d4b-5650-a0c7-da7821632489",
+        "kind": "tool",
+        "provider": "vector",
+        "toolId": "select-by-location",
+        "parameters": {
+          "predicate": "within"
+        },
+        "x": 520,
+        "y": 160
+      },
+      {
+        "id": "24ccc284-31ac-5520-80e9-5c379d317103",
+        "kind": "output",
+        "name": "City 50 km Zones",
+        "x": 520,
+        "y": 40
+      },
+      {
+        "id": "de4160cf-821c-5b8e-92e8-dc63fda95506",
+        "kind": "output",
+        "name": "Route Stations Near Cities",
+        "x": 760,
+        "y": 160
+      }
+    ],
+    "edges": [
+      {
+        "id": "4c915ae9-d4d9-5eb8-8cea-d75144df81a9",
+        "from": "3543910f-6901-52ce-9052-e8c410aa2823",
+        "fromPort": "out",
+        "to": "e6cb2a8a-b250-5313-a357-83af3c267eed",
+        "toPort": "layer"
+      },
+      {
+        "id": "68b15a9e-2ef9-552f-8e3a-737c9794aa11",
+        "from": "2c78a072-bf40-5024-abce-76371aa55295",
+        "fromPort": "out",
+        "to": "c5355849-f3f9-5ffd-97c3-2d95eeda731c",
+        "toPort": "layer"
+      },
+      {
+        "id": "8cb9b117-8893-5e50-b428-07f4eccd8b34",
+        "from": "e6cb2a8a-b250-5313-a357-83af3c267eed",
+        "fromPort": "out",
+        "to": "24ccc284-31ac-5520-80e9-5c379d317103",
+        "toPort": "in"
+      },
+      {
+        "id": "176b570e-6201-56cd-87a6-3f1496031da3",
+        "from": "c5355849-f3f9-5ffd-97c3-2d95eeda731c",
+        "fromPort": "out",
+        "to": "8cacd88f-0d4b-5650-a0c7-da7821632489",
+        "toPort": "layer"
+      },
+      {
+        "id": "88953bac-895a-50f3-82c2-0214a09397cf",
+        "from": "e6cb2a8a-b250-5313-a357-83af3c267eed",
+        "fromPort": "out",
+        "to": "8cacd88f-0d4b-5650-a0c7-da7821632489",
+        "toPort": "overlay"
+      },
+      {
+        "id": "8b6a5c8d-d31e-5a89-aad3-f4e04a045c64",
+        "from": "8cacd88f-0d4b-5650-a0c7-da7821632489",
+        "fromPort": "out",
+        "to": "de4160cf-821c-5b8e-92e8-dc63fda95506",
+        "toPort": "in"
+      }
+    ]
+  }
+}
