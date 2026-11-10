@@ -1,0 +1,53 @@
+{
+  "$schema": "https://geolibre.app/schemas/model-graph-v1.json",
+  "version": "1.0.0",
+  "name": "DEM Contour Lines",
+  "graph": {
+    "nodes": [
+      {
+        "id": "2abf45e8-19aa-536c-b22e-03476f26051b",
+        "kind": "input",
+        "layerId": "sample-dem",
+        "x": 40,
+        "y": 40
+      },
+      {
+        "id": "f2213340-2dc2-55c8-81d9-1a68f5fa0137",
+        "kind": "tool",
+        "provider": "whitebox",
+        "toolId": "contours_from_raster",
+        "parameters": {
+          "contour_interval": 100,
+          "base_contour": 0,
+          "smoothing_filter_size": 9,
+          "deflection_tolerance": 10
+        },
+        "x": 280,
+        "y": 40
+      },
+      {
+        "id": "9265444c-efc4-5121-a6ae-5e6cca3aba4c",
+        "kind": "output",
+        "name": "Contours (100 m)",
+        "x": 520,
+        "y": 40
+      }
+    ],
+    "edges": [
+      {
+        "id": "b3597d8c-7791-5789-aefd-f420f9a74c9d",
+        "from": "2abf45e8-19aa-536c-b22e-03476f26051b",
+        "fromPort": "out",
+        "to": "f2213340-2dc2-55c8-81d9-1a68f5fa0137",
+        "toPort": "input"
+      },
+      {
+        "id": "c852fd71-e418-5fb0-99ee-dad6e3f309d3",
+        "from": "f2213340-2dc2-55c8-81d9-1a68f5fa0137",
+        "fromPort": "output",
+        "to": "9265444c-efc4-5121-a6ae-5e6cca3aba4c",
+        "toPort": "in"
+      }
+    ]
+  }
+}

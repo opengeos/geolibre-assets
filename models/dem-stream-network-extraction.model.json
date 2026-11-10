@@ -5,21 +5,14 @@
   "graph": {
     "nodes": [
       {
-        "id": "62588568-f000-47ed-a9ca-0d7e2315e597",
+        "id": "1df51968-4391-5570-a4eb-272cc206d33e",
         "kind": "input",
-        "layerId": "raster-3aaf0qw",
+        "layerId": "sample-dem",
         "x": 40,
         "y": 40
       },
       {
-        "id": "6c4987a2-cb7c-4312-89a7-20dbc5323696",
-        "kind": "output",
-        "name": "Extracted Stream Network",
-        "x": 1000,
-        "y": 40
-      },
-      {
-        "id": "84b58170-0ff0-4137-aa6a-9cf287091e16",
+        "id": "3518ec8c-6339-5f0b-a0ef-72a432cef692",
         "kind": "tool",
         "provider": "whitebox",
         "toolId": "fill_depressions_wang_and_liu",
@@ -31,21 +24,19 @@
         "y": 40
       },
       {
-        "id": "90971e39-7a88-48a1-b344-831dc677821d",
+        "id": "c6288cc6-0156-5c38-a8fd-a647eee6622a",
         "kind": "tool",
-        "x": 760,
-        "y": 40,
         "provider": "whitebox",
-        "toolId": "raster_streams_to_vector",
+        "toolId": "d8_pointer",
         "parameters": {
           "esri_pntr": false
-        }
+        },
+        "x": 520,
+        "y": 40
       },
       {
-        "id": "2150be08-967b-4e8a-8350-bab5dbd67267",
+        "id": "8991009b-eb96-5ee6-9af7-1dd160c3651a",
         "kind": "tool",
-        "x": 280,
-        "y": 160,
         "provider": "whitebox",
         "toolId": "d8_flow_accum",
         "parameters": {
@@ -54,21 +45,12 @@
           "input_is_pointer": true,
           "log_transform": false,
           "out_type": "cells"
-        }
+        },
+        "x": 280,
+        "y": 160
       },
       {
-        "id": "0095f036-3f6f-45e7-8ec3-b0c627618052",
-        "kind": "tool",
-        "x": 520,
-        "y": 40,
-        "provider": "whitebox",
-        "toolId": "d8_pointer",
-        "parameters": {
-          "esri_pntr": false
-        }
-      },
-      {
-        "id": "2796a1d9-22a7-4415-b702-ee1aaad94c64",
+        "id": "cc4640a1-b4aa-5748-84bc-5e8b7caffefd",
         "kind": "tool",
         "provider": "whitebox",
         "toolId": "extract_streams",
@@ -78,56 +60,74 @@
         },
         "x": 520,
         "y": 160
+      },
+      {
+        "id": "d42a8090-ccf1-569a-9231-32c9689d28db",
+        "kind": "tool",
+        "provider": "whitebox",
+        "toolId": "raster_streams_to_vector",
+        "parameters": {
+          "esri_pntr": false
+        },
+        "x": 760,
+        "y": 40
+      },
+      {
+        "id": "d5d8dcbd-b93f-5601-9a58-082ce69ee5e8",
+        "kind": "output",
+        "name": "Extracted Stream Network",
+        "x": 1000,
+        "y": 40
       }
     ],
     "edges": [
       {
-        "id": "c8963881-adcc-460c-bef4-17c5ce0c6a82",
-        "from": "62588568-f000-47ed-a9ca-0d7e2315e597",
+        "id": "9d62bf2a-050d-53b1-8862-549bf792ab64",
+        "from": "1df51968-4391-5570-a4eb-272cc206d33e",
         "fromPort": "out",
-        "to": "84b58170-0ff0-4137-aa6a-9cf287091e16",
+        "to": "3518ec8c-6339-5f0b-a0ef-72a432cef692",
         "toPort": "dem"
       },
       {
-        "id": "c69541cf-c70f-44d7-a14b-f0b80797f243",
-        "from": "2150be08-967b-4e8a-8350-bab5dbd67267",
+        "id": "4b89d7c0-28e1-5eb2-b875-1d29bdbd8374",
+        "from": "3518ec8c-6339-5f0b-a0ef-72a432cef692",
         "fromPort": "output",
-        "to": "2796a1d9-22a7-4415-b702-ee1aaad94c64",
-        "toPort": "flow_accumulation"
-      },
-      {
-        "id": "49485506-d6f1-4c11-88b7-42c96fdfdf8d",
-        "from": "84b58170-0ff0-4137-aa6a-9cf287091e16",
-        "fromPort": "output",
-        "to": "0095f036-3f6f-45e7-8ec3-b0c627618052",
+        "to": "c6288cc6-0156-5c38-a8fd-a647eee6622a",
         "toPort": "dem"
       },
       {
-        "id": "291189a3-726b-454a-9562-84ba4a8ed451",
-        "from": "0095f036-3f6f-45e7-8ec3-b0c627618052",
+        "id": "b53d7d5e-a69c-5128-8eff-7f3f981542d3",
+        "from": "c6288cc6-0156-5c38-a8fd-a647eee6622a",
         "fromPort": "output",
-        "to": "2150be08-967b-4e8a-8350-bab5dbd67267",
+        "to": "8991009b-eb96-5ee6-9af7-1dd160c3651a",
         "toPort": "input"
       },
       {
-        "id": "11a182a3-c81b-433d-ad17-e833979589a5",
-        "from": "0095f036-3f6f-45e7-8ec3-b0c627618052",
+        "id": "976fd253-e477-5702-af54-7aeccede0aa0",
+        "from": "8991009b-eb96-5ee6-9af7-1dd160c3651a",
         "fromPort": "output",
-        "to": "90971e39-7a88-48a1-b344-831dc677821d",
+        "to": "cc4640a1-b4aa-5748-84bc-5e8b7caffefd",
+        "toPort": "flow_accumulation"
+      },
+      {
+        "id": "ececdf74-0a42-5e51-9150-0cce07fcf606",
+        "from": "c6288cc6-0156-5c38-a8fd-a647eee6622a",
+        "fromPort": "output",
+        "to": "d42a8090-ccf1-569a-9231-32c9689d28db",
         "toPort": "d8_pntr"
       },
       {
-        "id": "8f7a974a-b6f0-43a4-bd2f-1f1dab696f90",
-        "from": "2796a1d9-22a7-4415-b702-ee1aaad94c64",
+        "id": "abeba416-bf32-5432-a4d7-9b9e25c4282d",
+        "from": "cc4640a1-b4aa-5748-84bc-5e8b7caffefd",
         "fromPort": "output",
-        "to": "90971e39-7a88-48a1-b344-831dc677821d",
-        "toPort": "streams_raster"
+        "to": "d42a8090-ccf1-569a-9231-32c9689d28db",
+        "toPort": "streams"
       },
       {
-        "id": "7b42a464-664c-42ae-a004-3aa973a515b7",
-        "from": "90971e39-7a88-48a1-b344-831dc677821d",
+        "id": "02ae493e-e699-5757-9544-e03917cc8e77",
+        "from": "d42a8090-ccf1-569a-9231-32c9689d28db",
         "fromPort": "output",
-        "to": "6c4987a2-cb7c-4312-89a7-20dbc5323696",
+        "to": "d5d8dcbd-b93f-5601-9a58-082ce69ee5e8",
         "toPort": "in"
       }
     ]
