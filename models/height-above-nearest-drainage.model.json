@@ -12,13 +12,13 @@
         "y": 40
       },
       {
-        "id": "3592d71d-6321-553c-b5f7-26fdd9daa666",
+        "id": "9137b4f7-1817-52a6-8f88-f50ff28390f2",
         "kind": "tool",
         "provider": "whitebox",
-        "toolId": "breach_depressions_least_cost",
+        "toolId": "fill_depressions_wang_and_liu",
         "parameters": {
-          "max_dist": 100,
-          "fill_deps": true
+          "fix_flats": true,
+          "flat_increment": 0.0001
         },
         "x": 280,
         "y": 40
@@ -80,15 +80,15 @@
     ],
     "edges": [
       {
-        "id": "078c9dd6-c0ac-5f8f-9ea1-73fa04030b00",
+        "id": "9298db46-c3cb-5b27-ac1b-14f7c545bba7",
         "from": "03959fd2-eb24-5b38-ac2c-a5ef44817966",
         "fromPort": "out",
-        "to": "3592d71d-6321-553c-b5f7-26fdd9daa666",
+        "to": "9137b4f7-1817-52a6-8f88-f50ff28390f2",
         "toPort": "dem"
       },
       {
-        "id": "3a6da344-a322-5191-8cfc-869ac4e68d54",
-        "from": "3592d71d-6321-553c-b5f7-26fdd9daa666",
+        "id": "e3f72087-7f50-5e16-9341-cf85730ba7d4",
+        "from": "9137b4f7-1817-52a6-8f88-f50ff28390f2",
         "fromPort": "output",
         "to": "0a1c5800-1d0e-59b6-9696-e4fbe7bc7c95",
         "toPort": "dem"
@@ -108,8 +108,8 @@
         "toPort": "flow_accumulation"
       },
       {
-        "id": "69ffd5f2-31fd-529e-adf6-87056d5c077e",
-        "from": "3592d71d-6321-553c-b5f7-26fdd9daa666",
+        "id": "0d32a1a6-551e-5cc2-bcb3-9cbe9736fe6a",
+        "from": "9137b4f7-1817-52a6-8f88-f50ff28390f2",
         "fromPort": "output",
         "to": "4ff67459-220e-5833-b1c6-54a9fd2bbbc6",
         "toPort": "dem"
