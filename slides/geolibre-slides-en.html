@@ -237,9 +237,9 @@ tr:last-child td{border-bottom:none}
       <div class="card logocard"><img src="images/leafmap.webp" alt="leafmap"><h4>leafmap</h4><div class="metarow"><span class="year">2021</span><span class="stars"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 .8l2.2 4.6 5 .7-3.6 3.5.9 5L8 12.3 3.5 14.6l.9-5L.8 6.1l5-.7z"/></svg>3.8k</span></div><p>Interactive mapping, no cloud vendor required</p></div>
       <div class="card logocard"><img src="images/samgeo.webp" alt="samgeo"><h4>samgeo</h4><div class="metarow"><span class="year">2023</span><span class="stars"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 .8l2.2 4.6 5 .7-3.6 3.5.9 5L8 12.3 3.5 14.6l.9-5L.8 6.1l5-.7z"/></svg>4.2k</span></div><p>SAM applied to remote sensing imagery</p></div>
       <div class="card logocard"><img src="images/geoai.webp" alt="GeoAI"><h4>GeoAI</h4><div class="metarow"><span class="year">2025</span><span class="stars"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 .8l2.2 4.6 5 .7-3.6 3.5.9 5L8 12.3 3.5 14.6l.9-5L.8 6.1l5-.7z"/></svg>3.5k</span></div><p>Deep learning toolkit for geospatial data</p></div>
-      <div class="card logocard"><img src="images/geolibre.webp" alt="GeoLibre"><h4>GeoLibre</h4><div class="metarow"><span class="year">2026</span><span class="stars"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 .8l2.2 4.6 5 .7-3.6 3.5.9 5L8 12.3 3.5 14.6l.9-5L.8 6.1l5-.7z"/></svg>8.4k</span></div><p>A full GIS anyone can just open</p></div>
+      <div class="card logocard"><img src="images/geolibre.webp" alt="GeoLibre"><h4>GeoLibre</h4><div class="metarow"><span class="year">2026</span><span class="stars"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 .8l2.2 4.6 5 .7-3.6 3.5.9 5L8 12.3 3.5 14.6l.9-5L.8 6.1l5-.7z"/></svg>8.5k</span></div><p>A full GIS anyone can just open</p></div>
     </div>
-    <div class="cap" style="margin-top:12px">Blue is the first public release year, gold is GitHub stars (snapshot, November 2026): geemap 4,060 &middot; leafmap 3,796 &middot; segment-geospatial 4,192 &middot; GeoAI 3,452 &middot; GeoLibre 8,389</div>
+    <div class="cap" style="margin-top:12px">Blue is the first public release year, gold is GitHub stars (snapshot, November 2026): geemap 4,071 &middot; leafmap 3,800 &middot; segment-geospatial 4,203 &middot; GeoAI 3,464 &middot; GeoLibre 8,538</div>
     <div class="sub mt14">Every one of these projects does the same thing: <strong>it removes steps between the technology and the person using it</strong>. GeoLibre goes furthest, because it removes installation itself.</div>
   </div>
   <div class="foot"><div class="b"><img class="logo" src="images/geolibre.webp" alt="">GeoLibre &middot; A cloud-native GIS that runs everywhere</div><div class="n"></div></div>
@@ -411,7 +411,7 @@ tr:last-child td{border-bottom:none}
   <div class="inner">
     <div class="big">02</div>
     <h2>What GeoLibre is</h2>
-    <div class="sub">A free, open-source, lightweight cloud-native GIS platform. First released 27 May 2026, MIT licensed, currently v2.9.0.</div>
+    <div class="sub">A free, open-source, lightweight cloud-native GIS platform. First released 27 May 2026, MIT licensed, currently v3.7.0.</div>
   </div>
 </section>
 
@@ -611,7 +611,7 @@ tr:last-child td{border-bottom:none}
         <ul class="tight">
           <li><strong>3D Tiles</strong>: photogrammetry and mesh datasets stream in and render on deck.gl over the MapLibre map, including authenticated tilesets via custom headers.</li>
           <li><strong>LiDAR point clouds</strong>: COPC and LAZ coloured by elevation or classification. The USGS LiDAR plugin clips to an area of interest and downloads COPC.</li>
-          <li><strong>ArcGIS I3S</strong> scene layers (Integrated Mesh and 3D Object) render on deck.gl as well.</li>
+          <li><strong>ArcGIS I3S</strong> scene layers (Integrated Mesh, 3D Object and BIM Building Scene Layers) render on deck.gl as well.</li>
           <li class="t"><strong>Gaussian splats</strong>, glTF/GLB models placed at coordinates, and georeferenced video overlays.</li>
           <li class="t"><strong>Terrain-aware measurement</strong> in 3D, with a great-circle initial bearing and a 16-point compass label.</li>
         </ul>
@@ -806,7 +806,7 @@ tr:last-child td{border-bottom:none}
       <div class="card"><h3><span class="dot"></span>Docker on your own network</h3><p>One command runs the web build in a container, with optional HTTP Basic Auth. <code>GEOLIBRE_SHARE_URL</code> and <code>GEOLIBRE_COLLAB_URL</code> point sharing at your own servers at container start, and <code>off</code> removes it from the UI entirely.</p></div>
       <div class="card"><h3><span class="dot"></span>A fully isolated build</h3><p><code>GEOLIBRE_NO_EXTERNAL_CDN=1</code> strips every external CDN reference and makes the few features that genuinely need a remote host <strong>say so up front</strong> rather than failing at the end of a run.</p></div>
       <div class="card teal"><h3><span class="dot t"></span>UI Profiles</h3><p>Tailor which menus, panels and data sources a deployment shows, so a general-purpose GIS becomes a focused tool for one job, with no code changes and no fork to maintain.</p></div>
-      <div class="card teal"><h3><span class="dot t"></span>Offline and localization</h3><p>Installable as an offline-capable PWA, with a Download Offline Area tool that pre-caches basemap tiles. 18 locale catalogs, including right-to-left Arabic and Persian with a mirrored interface.</p></div>
+      <div class="card teal"><h3><span class="dot t"></span>Offline and localization</h3><p>Installable as an offline-capable PWA, with a Download Offline Area tool that pre-caches basemap tiles. 21 locale catalogs, including right-to-left Arabic, Persian and Hebrew with a mirrored interface.</p></div>
     </div>
     <div class="sub mt26">Self-hosted sharing, accounts and live collaboration have a documented v1 HTTP contract and a FastAPI reference implementation, so an institution can keep every project on its own infrastructure.</div>
   </div>
@@ -863,7 +863,7 @@ tr:last-child td{border-bottom:none}
     <div class="rule"></div>
     <div class="cols c3 gap14">
       <div class="card"><h3><span class="dot"></span>Use it and tell me</h3><p>File issues, report bugs, request features. A clear description of a real workflow is often worth more than a patch.</p></div>
-      <div class="card"><h3><span class="dot"></span>Translations</h3><p>18 locales ship today. Reviewing terminology in your own language is the easiest high-impact contribution there is.</p></div>
+      <div class="card"><h3><span class="dot"></span>Translations</h3><p>21 locales ship today. Reviewing terminology in your own language is the easiest high-impact contribution there is.</p></div>
       <div class="card"><h3><span class="dot t"></span>Write a plugin</h3><p>Build against the <code>plugin.json</code> contract. No changes to the main repository, and nothing to wait for a merge on.</p></div>
       <div class="card teal"><h3><span class="dot t"></span>Teach with it</h3><p>Zero install means the lab machines, the borrowed laptop and the student's own device stop being obstacles. One link starts the class.</p></div>
       <div class="card teal"><h3><span class="dot t"></span>Pilot it at work</h3><p>Docker on an internal network plus UI Profiles makes it cheap to try on one concrete workflow before committing.</p></div>
