@@ -12,13 +12,13 @@
         "y": 40
       },
       {
-        "id": "ab1e8b61-fe9a-5e64-ba5e-67b6cefb7cc9",
+        "id": "0f554e38-ed3a-5105-a639-968bb86aefa9",
         "kind": "tool",
         "provider": "whitebox",
-        "toolId": "breach_depressions_least_cost",
+        "toolId": "fill_depressions_wang_and_liu",
         "parameters": {
-          "max_dist": 100,
-          "fill_deps": true
+          "fix_flats": true,
+          "flat_increment": 0.0001
         },
         "x": 280,
         "y": 40
@@ -55,7 +55,7 @@
         "provider": "whitebox",
         "toolId": "extract_streams",
         "parameters": {
-          "threshold": 2000,
+          "threshold": 1000,
           "zero_background": true
         },
         "x": 520,
@@ -68,7 +68,7 @@
         "toolId": "strahler_stream_order",
         "parameters": {
           "esri_pntr": false,
-          "zero_background": true
+          "zero_background": false
         },
         "x": 760,
         "y": 40
@@ -83,15 +83,15 @@
     ],
     "edges": [
       {
-        "id": "f54d5932-f5ea-5b9f-8bc6-0dd9c632728a",
+        "id": "dba25720-01c7-5cef-9e96-66fa66b6d95a",
         "from": "241c5806-5f7c-5e63-96f5-45a91c3c4e1c",
         "fromPort": "out",
-        "to": "ab1e8b61-fe9a-5e64-ba5e-67b6cefb7cc9",
+        "to": "0f554e38-ed3a-5105-a639-968bb86aefa9",
         "toPort": "dem"
       },
       {
-        "id": "d20f4563-f79d-5f78-a8d3-6a7aef6a1c64",
-        "from": "ab1e8b61-fe9a-5e64-ba5e-67b6cefb7cc9",
+        "id": "bbc5c9ed-544e-5395-8c2c-b26997b298bf",
+        "from": "0f554e38-ed3a-5105-a639-968bb86aefa9",
         "fromPort": "output",
         "to": "23b8835c-92f3-5565-8feb-bd64c5502075",
         "toPort": "dem"
